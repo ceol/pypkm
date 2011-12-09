@@ -39,7 +39,7 @@ import struct
 from array import array
 
 import rng
-from datautils import setbit, getbit, clearbit, checksum, shuffle
+from bitutils import setbit, getbit, clearbit, checksum, shuffle
 
 class PkmCore(object):
     """Core PKM file manipulation functions.

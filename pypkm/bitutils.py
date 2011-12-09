@@ -1,10 +1,10 @@
 # coding=utf-8
 
-"""General utilities for manipulating PKM file data.
+"""General utilities for working with file byte data.
 
-These functions could potentially be used to manipulate data in general, so I
-want to keep them separate for sanity. The *bit functions are really just so
-I don't have a bunch of bit shifting thrown in my code and not know
+These functions could potentially be used to manipulate byte data in general,
+so I want to keep them separate for sanity. The *bit functions are really
+just so I don't have a bunch of bit shifting thrown in my code and not know
 immediately what it's doing.
 """
 
