@@ -41,9 +41,6 @@ from array import array
 import rng
 from datautils import setbit, getbit, clearbit, checksum, shuffle
 
-import sys
-sys.path.append('data')
-
 class PkmCore(object):
     """Core PKM file manipulation functions.
     
