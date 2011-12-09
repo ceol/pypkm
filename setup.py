@@ -6,5 +6,5 @@ setup(name='PyPKM',
       author='Patrick Jacobs',
       author_email='ceolwulf@gmail.com',
       url='http://bitbucket.org/ceol/pypkm',
-      packages=['pypkm'],
+      packages=['pypkm', 'pypkm.data'],
      )
