@@ -1,6 +1,6 @@
 # coding=utf-8
 
-"""PyPkm: Easy PKM file manipulation.
+"""PyPKM: Easy PKM file manipulation.
 
 This utility serves as a friendly way to create, edit, encrypt, decrypt, and
 convert PKM files. Its goal is to faciliate the creation of more end-user
@@ -14,6 +14,9 @@ Example usage:
     >>> pkm.level = 100
     >>> pkm.save()
     gengar_new.pkm
+    >>> pkm.level = 50
+    >>> pkm.save('gengar_50.pkm')
+    gengar_50.pkm
 
 For instructions on how to set a specific attribute, refer to that
 attribute's function in the Pkm class.
@@ -36,7 +39,10 @@ import struct
 from array import array
 
 import rng
-from datautil import setbit, getbit, clearbit, checksum, shuffle
+from datautils import setbit, getbit, clearbit, checksum, shuffle
+
+import sys
+sys.path.append('data')
 
 class PkmCore(object):
     """Core PKM file manipulation functions.
