@@ -34,7 +34,7 @@ IRC channel.
 
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
-import random
+import sqlite3
 import struct
 from array import array
 
