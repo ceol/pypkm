@@ -168,3 +168,174 @@ class Pkm(PkmCore):
             pkm.save()
         """
         pass
+    
+    # Attribute functions.
+    
+    def _pv():
+        "Personality value."
+        pass
+    
+    def _checksum():
+        "Checksum."
+        pass
+    
+    def _dex():
+        "National Pokédex ID."
+        pass
+    
+    def _item():
+        "Held item ID."
+        pass
+    
+    def _ot_id():
+        "Original trainer ID."
+        pass
+    
+    def _ot_secret_id():
+        "Original trainer secret ID."
+        pass
+    
+    def _exp():
+        "Experience points total."
+        pass
+    
+    def _happiness():
+        "Happiness (or steps to hatch if an egg)."
+        pass
+    
+    def _ability():
+        "Ability ID."
+        pass
+    
+    def _markings():
+        "Pokédex markings (I think?)."
+        
+        markings = {
+            'circle': 0x01,
+            'triangle': 0x02,
+            'square': 0x04,
+            'heart': 0x08,
+            'star': 0x10,
+            'diamond': 0x20,
+        }
+    
+    def _language():
+        "Language."
+        
+        languages = {
+            'jp': 0x1,
+            'en': 0x2,
+            'fr': 0x3,
+            'it': 0x4,
+            'de': 0x5,
+            'es': 0x7,
+            'kr': 0x8,
+        }
+    
+    def _evs():
+        "Effort values."
+        pass
+    
+    def _cvs():
+        "Contest values."
+        pass
+    
+    def _ribbons():
+        "Hoenn and Sinnoh ribbon sets."
+        pass
+    
+    def _moves():
+        "Moveset IDs."
+        pass
+    
+    def _move_pp():
+        "Current move PP."
+        pass
+    
+    def _move_ppup():
+        "Move PP-Ups."
+        pass
+    
+    def _ivs():
+        "Individual values."
+        pass
+    
+    def _fateful_encounter():
+        "Fateful encounter flag."
+        pass
+    
+    def _gender():
+        "Pokémon gender."
+        pass
+    
+    def _shiny_leaves():
+        "Shiny leaves (HG/SS-only)."
+        pass
+    
+    def _leaf_crown():
+        "Leaf Crown (HG/SS-only)."
+        pass
+    
+    def _egg_location():
+        "Location where the egg was received."
+        pass
+    
+    def _met_location():
+        "Location where the Pokémon was met."
+        pass
+    
+    def _nickname():
+        "Pokémon nickname."
+        pass
+    
+    def _hometown():
+        "Pokémon hometown."
+        pass
+    
+    def _ot_name():
+        "Original trainer name."
+        pass
+    
+    def _egg_date():
+        "Date when the egg was received."
+        pass
+    
+    def _met_date():
+        "Date when the Pokémon was met."
+        pass
+    
+    def _pokerus():
+        "Pokérus flag."
+        pass
+    
+    def _pokeball():
+        "Poké Ball ID."
+        pass
+    
+    def _met_level():
+        "Level at which the Pokémon was met."
+        pass
+    
+    def _ot_gender():
+        "Original trainer gender."
+        pass
+    
+    def _encounter_type():
+        "Pokémon encounter type."
+        pass
+    
+    def _hgss_pokeball():
+        "Poké Ball ID specific to HG/SS."
+        pass
+    
+    def _level():
+        "Level."
+        pass
+    
+    def _dw_ability():
+        "Dream World ability flag."
+        pass
+    
+    def _nature():
+        "Nature (B/W-only)."
+        pass
