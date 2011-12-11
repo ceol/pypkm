@@ -7,4 +7,5 @@ setup(name='PyPKM',
       author_email='ceolwulf@gmail.com',
       url='http://bitbucket.org/ceol/pypkm',
       packages=['pypkm', 'pypkm.pkmdata'],
+      package_data=['pypkm': ['db/*.db']],
      )
