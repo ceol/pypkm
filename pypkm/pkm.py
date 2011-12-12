@@ -153,7 +153,9 @@ class PkmCore(object):
         split2 = data[offset+size:]
         new_data = split1+packed+split2
         
-        return new_data
+        self._adddata(new_data)
+        
+        return self._getdata()
     
     def _encrypt(self):
         "Encrypt the loaded PKM data."
@@ -182,7 +184,10 @@ class Pkm(PkmCore):
     def __setattr__(self, name, value):
         "Attempt to map any calls to missing attributes to functions."
         
-        return getattr(self, '_' + name)(self, value)
+        new_data = getattr(self, '_' + name)(self, value)
+        self._adddata(new_data)
+        
+        return self._getdata()
     
     def new(self, generation, path=None):
         """Create a blank PKM file to be filled with custom data.
