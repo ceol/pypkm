@@ -91,7 +91,7 @@ class PkmCore(object):
         if data is None:
             data = _file_edit_history.pop()
         size = struct.calcsize(fmt)
-        unpacked = self._unpack(fmt, data[byte:byte+data])
+        unpacked = self._unpack(fmt, data[byte:byte+size])
         
         return unpacked[0]
     
@@ -128,7 +128,7 @@ class Pkm(PkmCore):
         
         return getattr(self, '_' + name)(self, value)
     
-    def new(self, path=None, generation):
+    def new(self, generation, path=None):
         """Create a blank PKM file to be filled with custom data.
         
         Keyword arguments:
