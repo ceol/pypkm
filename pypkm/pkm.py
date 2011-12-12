@@ -260,13 +260,13 @@ class Pkm(PkmCore):
         "Language."
         
         languages = {
-            'jp': 0x1,
-            'en': 0x2,
-            'fr': 0x3,
-            'it': 0x4,
-            'de': 0x5,
-            'es': 0x7,
-            'kr': 0x8,
+            'jp': 0x01,
+            'en': 0x02,
+            'fr': 0x03,
+            'it': 0x04,
+            'de': 0x05,
+            'es': 0x07,
+            'kr': 0x08,
         }
     
     def _evs(self):
