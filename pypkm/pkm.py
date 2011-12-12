@@ -63,17 +63,17 @@ class PkmCore(object):
     # Path to the save file.
     _file_save_path = ''
     
-    # Data of the loaded file.
-    #
-    # Subsequent changes should be stored in the file_edit_history list.
-    _file_load_data = ''
-    
     # Edit history list to undo/redo changes.
     # 
-    # Note: I might not want to implement this due to a possible memory issue
-    # if there are too many changes in a single session. If that's the case,
-    # then just save the last revision in here.
+    # Note: I might not want to implement this completely due to a possible
+    # memory issue if there are too many changes in a single session. If
+    # that's the case, then just save the last revision in here.
     _file_edit_history = []
+    
+    def _getdata(self):
+        "Retrieve the current working data."
+        
+        return self._file_edit_history.pop()
     
     def _pack(self):
         "Pack a specific section of PKM byte data."
@@ -86,8 +86,10 @@ class PkmCore(object):
     def _get(self, fmt, offset, data=None):
         "Retrieve byte data located at offset."
         
+        # Let them supply their own file data!
         if data is None:
-            data = _file_edit_history.pop()
+            data = self._getdata()
+        
         size = struct.calcsize(fmt)
         unpacked = struct.unpack(fmt, data[offset:offset+size])
         
@@ -96,8 +98,10 @@ class PkmCore(object):
     def _set(self, fmt, offset, value, data=None):
         "Set a value located at offset."
         
+        # Let them supply their own file data!
         if data is None:
-            data = _file_edit_history.pop()
+            data = self._getdata()
+        
         size = struct.calcsize(fmt)
         packed = struct.pack(fmt, value)
         
