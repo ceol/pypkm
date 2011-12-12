@@ -75,14 +75,36 @@ class PkmCore(object):
     # then just save the last revision in here.
     _file_edit_history = []
     
+    def _pack(self, fmt, data):
+        "Pack a specific section of PKM byte data."
+        
+        return struct.pack(fmt, data)
+    
+    def _unpack(self, fmt, data):
+        "Unpack a specific section of PKM byte data."
+        
+        return struct.unpack(fmt, data)
+    
+    def _get(self, fmt, byte, data=None):
+        "Retrieve byte data."
+        
+        if data is None:
+            data = _file_edit_history.pop()
+        size = struct.calcsize(fmt)
+        unpacked = self._unpack(fmt, data[byte:byte+data])
+        
+        return unpacked[0]
+    
+    def _set(self):
+        "Set byte data."
+        pass
+    
     def _encrypt(self):
-        """Encrypt the loaded PKM data.
-        """
+        "Encrypt the loaded PKM data."
         pass
     
     def _decrypt(self):
-        """Decrypt the loaded PKM data.
-        """
+        "Decrypt the loaded PKM data."
         pass
 
 class Pkm(PkmCore):
@@ -171,43 +193,43 @@ class Pkm(PkmCore):
     
     # Attribute functions.
     
-    def _pv():
+    def _pv(self):
         "Personality value."
         pass
     
-    def _checksum():
+    def _checksum(self):
         "Checksum."
         pass
     
-    def _dex():
+    def _dex(self):
         "National Pokédex ID."
         pass
     
-    def _item():
+    def _item(self):
         "Held item ID."
         pass
     
-    def _ot_id():
+    def _ot_id(self):
         "Original trainer ID."
         pass
     
-    def _ot_secret_id():
+    def _ot_secret_id(self):
         "Original trainer secret ID."
         pass
     
-    def _exp():
+    def _exp(self):
         "Experience points total."
         pass
     
-    def _happiness():
+    def _happiness(self):
         "Happiness (or steps to hatch if an egg)."
         pass
     
-    def _ability():
+    def _ability(self):
         "Ability ID."
         pass
     
-    def _markings():
+    def _markings(self):
         "Pokédex markings (I think?)."
         
         markings = {
@@ -219,7 +241,7 @@ class Pkm(PkmCore):
             'diamond': 0x20,
         }
     
-    def _language():
+    def _language(self):
         "Language."
         
         languages = {
@@ -232,110 +254,110 @@ class Pkm(PkmCore):
             'kr': 0x8,
         }
     
-    def _evs():
+    def _evs(self):
         "Effort values."
         pass
     
-    def _cvs():
+    def _cvs(self):
         "Contest values."
         pass
     
-    def _ribbons():
+    def _ribbons(self):
         "Hoenn and Sinnoh ribbon sets."
         pass
     
-    def _moves():
+    def _moves(self):
         "Moveset IDs."
         pass
     
-    def _move_pp():
+    def _move_pp(self):
         "Current move PP."
         pass
     
-    def _move_ppup():
+    def _move_ppup(self):
         "Move PP-Ups."
         pass
     
-    def _ivs():
+    def _ivs(self):
         "Individual values."
         pass
     
-    def _fateful_encounter():
+    def _fateful_encounter(self):
         "Fateful encounter flag."
         pass
     
-    def _gender():
+    def _gender(self):
         "Pokémon gender."
         pass
     
-    def _shiny_leaves():
+    def _shiny_leaves(self):
         "Shiny leaves (HG/SS-only)."
         pass
     
-    def _leaf_crown():
+    def _leaf_crown(self):
         "Leaf Crown (HG/SS-only)."
         pass
     
-    def _egg_location():
+    def _egg_location(self):
         "Location where the egg was received."
         pass
     
-    def _met_location():
+    def _met_location(self):
         "Location where the Pokémon was met."
         pass
     
-    def _nickname():
+    def _nickname(self):
         "Pokémon nickname."
         pass
     
-    def _hometown():
+    def _hometown(self):
         "Pokémon hometown."
         pass
     
-    def _ot_name():
+    def _ot_name(self):
         "Original trainer name."
         pass
     
-    def _egg_date():
+    def _egg_date(self):
         "Date when the egg was received."
         pass
     
-    def _met_date():
+    def _met_date(self):
         "Date when the Pokémon was met."
         pass
     
-    def _pokerus():
+    def _pokerus(self):
         "Pokérus flag."
         pass
     
-    def _pokeball():
+    def _pokeball(self):
         "Poké Ball ID."
         pass
     
-    def _met_level():
+    def _met_level(self):
         "Level at which the Pokémon was met."
         pass
     
-    def _ot_gender():
+    def _ot_gender(self):
         "Original trainer gender."
         pass
     
-    def _encounter_type():
+    def _encounter_type(self):
         "Pokémon encounter type."
         pass
     
-    def _hgss_pokeball():
+    def _hgss_pokeball(self):
         "Poké Ball ID specific to HG/SS."
         pass
     
-    def _level():
+    def _level(self):
         "Level."
         pass
     
-    def _dw_ability():
+    def _dw_ability(self):
         "Dream World ability flag."
         pass
     
-    def _nature():
+    def _nature(self):
         "Nature (B/W-only)."
         pass
