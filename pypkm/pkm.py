@@ -34,12 +34,14 @@ IRC channel.
 
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
-import sqlite3
-import struct
-from array import array
+import struct  # getting/setting data
+import sqlite3 # creating battle data and gen 4 text encoding
+from bitutils import setbit, getbit, clearbit # setting/getting certain flags
 
-import rng
-from bitutils import setbit, getbit, clearbit, checksum, shuffle
+# Encryption/decryption functions
+#from array import array
+#import rng
+#from bitutils import checksum, shuffle
 
 class PkmCore(object):
     """Core PKM file manipulation functions.
@@ -56,6 +58,9 @@ class PkmCore(object):
     it back up once finished. This also allows the user to edit files without
     loading them beforehand.
     """
+    
+    # File generation (4 or 5)
+    _file_generation = None
     
     # Path to the loaded file.
     _file_load_path = ''
@@ -75,6 +80,29 @@ class PkmCore(object):
         
         return self._file_edit_history.pop()
     
+    def _adddata(self, data):
+        """Add a node of current working data.
+        
+        Keyword arguments:
+        data (string) -- the data to add to work history
+        """
+        
+        self._file_edit_history.append(data)
+    
+    def _getgen(self):
+        "Retrieve the current working generation."
+        
+        return self._file_generation
+    
+    def _setgen(self, generation):
+        """Set the current working generation.
+        
+        Keyword arguments:
+        generation (int) -- the file's game generation (4 or 5)
+        """
+        
+        self._file_generation = generation
+    
     def _pack(self):
         "Pack a specific section of PKM byte data."
         pass
@@ -84,7 +112,13 @@ class PkmCore(object):
         pass
     
     def _get(self, fmt, offset, data=None):
-        "Retrieve byte data located at offset."
+        """Retrieve byte data located at offset.
+        
+        Keyword arguments:
+        fmt (string) -- a struct format string
+        offset (int) -- the byte offset (inclusive)
+        data (string) -- optional data to use instead of history
+        """
         
         # Let them supply their own file data!
         if data is None:
@@ -96,7 +130,14 @@ class PkmCore(object):
         return unpacked[0]
     
     def _set(self, fmt, offset, value, data=None):
-        "Set a value located at offset."
+        """Set a value located at offset.
+        
+        Keyword arguments:
+        fmt (string) -- a struct format string
+        offset (int) -- the byte offset (inclusive)
+        value (mixed) -- the value to inject at the specific offset
+        data (string) -- optional data to use instead of history
+        """
         
         # Let them supply their own file data!
         if data is None:
@@ -163,12 +204,16 @@ class Pkm(PkmCore):
         data (string) -- the raw file data
         generation (int) -- the file's game generation (4 or 5)
         
-        Note: if you load raw data, you must supply a path if you decide to
-        call save().
+        Note: if you load raw data, you must supply a path to the save()
+        method.
         """
-        pass
+        
+        self._adddata(data)
+        self._setgen(generation)
+        
+        return self
     
-    def load_from_path(self, path, generation):
+    def load_from_path(self, generation, path):
         """Load a PKM file from raw data to be edited.
         
         Keyword arguments:
@@ -178,7 +223,13 @@ class Pkm(PkmCore):
         Note: refer to save()'s documentation for what happens when you load
         from a path and save.
         """
-        pass
+        
+        data = open(path).read()
+        
+        self._adddata(data)
+        self._setgen(generation)
+        
+        return self
     
     def save(self, path=None):
         """Save the most recent changes.
@@ -204,7 +255,13 @@ class Pkm(PkmCore):
             # saves to a new file in the same directory (./gengar_new.pkm)
             pkm.save()
         """
-        pass
+        
+        data = self._getdata()
+        
+        with open(path, 'w') as f:
+            f.write(data)
+        
+        return self
     
     # Attribute functions.
     
