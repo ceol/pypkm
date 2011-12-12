@@ -101,6 +101,9 @@ class PkmCore(object):
         size = struct.calcsize(fmt)
         packed = struct.pack(fmt, value)
         
+        # Inject our packed data (it's hacky, but seems to do the job!)
+        # strings are immutable and I don't want to unpack the entire string
+        # so this will have to do. KISS.
         split1 = data[:offset]
         split2 = data[offset+size:]
         new_data = split1+packed+split2
