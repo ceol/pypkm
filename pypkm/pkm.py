@@ -208,43 +208,43 @@ class Pkm(PkmCore):
     
     # Attribute functions.
     
-    def _pv(self):
+    def _pv(self, value=None):
         "Personality value."
         pass
     
-    def _checksum(self):
+    def _checksum(self, value=None):
         "Checksum."
         pass
     
-    def _dex(self):
+    def _dex(self, value=None):
         "National Pokédex ID."
         pass
     
-    def _item(self):
+    def _item(self, value=None):
         "Held item ID."
         pass
     
-    def _ot_id(self):
+    def _ot_id(self, value=None):
         "Original trainer ID."
         pass
     
-    def _ot_secret_id(self):
+    def _ot_secret_id(self, value=None):
         "Original trainer secret ID."
         pass
     
-    def _exp(self):
+    def _exp(self, value=None):
         "Experience points total."
         pass
     
-    def _happiness(self):
+    def _happiness(self, value=None):
         "Happiness (or steps to hatch if an egg)."
         pass
     
-    def _ability(self):
+    def _ability(self, value=None):
         "Ability ID."
         pass
     
-    def _markings(self):
+    def _markings(self, value=None):
         "Pokédex markings (I think?)."
         
         markings = {
@@ -256,7 +256,7 @@ class Pkm(PkmCore):
             'diamond': 0x20,
         }
     
-    def _language(self):
+    def _language(self, value=None):
         "Language."
         
         languages = {
@@ -269,110 +269,110 @@ class Pkm(PkmCore):
             'kr': 0x08,
         }
     
-    def _evs(self):
+    def _evs(self, value=None):
         "Effort values."
         pass
     
-    def _cvs(self):
+    def _cvs(self, value=None):
         "Contest values."
         pass
     
-    def _ribbons(self):
+    def _ribbons(self, value=None):
         "Hoenn and Sinnoh ribbon sets."
         pass
     
-    def _moves(self):
+    def _moves(self, value=None):
         "Moveset IDs."
         pass
     
-    def _move_pp(self):
+    def _move_pp(self, value=None):
         "Current move PP."
         pass
     
-    def _move_ppup(self):
+    def _move_ppup(self, value=None):
         "Move PP-Ups."
         pass
     
-    def _ivs(self):
+    def _ivs(self, value=None):
         "Individual values."
         pass
     
-    def _fateful_encounter(self):
+    def _fateful_encounter(self, value=None):
         "Fateful encounter flag."
         pass
     
-    def _gender(self):
+    def _gender(self, value=None):
         "Pokémon gender."
         pass
     
-    def _shiny_leaves(self):
+    def _shiny_leaves(self, value=None):
         "Shiny leaves (HG/SS-only)."
         pass
     
-    def _leaf_crown(self):
+    def _leaf_crown(self, value=None):
         "Leaf Crown (HG/SS-only)."
         pass
     
-    def _egg_location(self):
+    def _egg_location(self, value=None):
         "Location where the egg was received."
         pass
     
-    def _met_location(self):
+    def _met_location(self, value=None):
         "Location where the Pokémon was met."
         pass
     
-    def _nickname(self):
+    def _nickname(self, value=None):
         "Pokémon nickname."
         pass
     
-    def _hometown(self):
+    def _hometown(self, value=None):
         "Pokémon hometown."
         pass
     
-    def _ot_name(self):
+    def _ot_name(self, value=None):
         "Original trainer name."
         pass
     
-    def _egg_date(self):
+    def _egg_date(self, value=None):
         "Date when the egg was received."
         pass
     
-    def _met_date(self):
+    def _met_date(self, value=None):
         "Date when the Pokémon was met."
         pass
     
-    def _pokerus(self):
+    def _pokerus(self, value=None):
         "Pokérus flag."
         pass
     
-    def _pokeball(self):
+    def _pokeball(self, value=None):
         "Poké Ball ID."
         pass
     
-    def _met_level(self):
+    def _met_level(self, value=None):
         "Level at which the Pokémon was met."
         pass
     
-    def _ot_gender(self):
+    def _ot_gender(self, value=None):
         "Original trainer gender."
         pass
     
-    def _encounter_type(self):
+    def _encounter_type(self, value=None):
         "Pokémon encounter type."
         pass
     
-    def _hgss_pokeball(self):
+    def _hgss_pokeball(self, value=None):
         "Poké Ball ID specific to HG/SS."
         pass
     
-    def _level(self):
+    def _level(self, value=None):
         "Level."
         pass
     
-    def _dw_ability(self):
+    def _dw_ability(self, value=None):
         "Dream World ability flag."
         pass
     
-    def _nature(self):
+    def _nature(self, value=None):
         "Nature (B/W-only)."
         pass
