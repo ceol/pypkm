@@ -75,29 +75,37 @@ class PkmCore(object):
     # then just save the last revision in here.
     _file_edit_history = []
     
-    def _pack(self, fmt, data):
+    def _pack(self):
         "Pack a specific section of PKM byte data."
-        
-        return struct.pack(fmt, data)
+        pass
     
-    def _unpack(self, fmt, data):
+    def _unpack(self):
         "Unpack a specific section of PKM byte data."
-        
-        return struct.unpack(fmt, data)
+        pass
     
-    def _get(self, fmt, byte, data=None):
-        "Retrieve byte data."
+    def _get(self, fmt, offset, data=None):
+        "Retrieve byte data located at offset."
         
         if data is None:
             data = _file_edit_history.pop()
         size = struct.calcsize(fmt)
-        unpacked = self._unpack(fmt, data[byte:byte+size])
+        unpacked = struct.unpack(fmt, data[offset:offset+size])
         
         return unpacked[0]
     
-    def _set(self):
-        "Set byte data."
-        pass
+    def _set(self, fmt, offset, value, data=None):
+        "Set a value located at offset."
+        
+        if data is None:
+            data = _file_edit_history.pop()
+        size = struct.calcsize(fmt)
+        packed = struct.pack(fmt, value)
+        
+        split1 = data[:offset]
+        split2 = data[offset+size:]
+        new_data = split1+packed+split2
+        
+        return new_data
     
     def _encrypt(self):
         "Encrypt the loaded PKM data."
