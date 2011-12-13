@@ -279,8 +279,20 @@ class Pkm(PkmCore):
     # Attribute functions.
     
     def _pv(self, value=None):
-        "Personality value."
-        pass
+        """Personality value.
+        
+        Note: Do NOT set this unless you know what you are doing!
+        """
+        
+        fmt = 'L'
+        offset = 0x00
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.pv
+        
+        return self._get(fmt, offset)
     
     def _checksum(self, value=None):
         "Checksum."
@@ -552,7 +564,7 @@ class Pkm(PkmCore):
         return self._get(fmt, offset)
     
     def _dw_ability(self, value=None):
-        "Dream World ability flag."
+        "Dream World ability flag. (B/W-only)"
         
         fmt = 'B'
         offset = 0x42
