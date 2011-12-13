@@ -456,8 +456,40 @@ class Pkm(PkmCore):
         pass
     
     def _moves(self, value=None):
-        "Moveset IDs."
-        pass
+        """Moveset IDs.
+        
+        Expects/returns a list of moves. In Pokémon games, moves are
+        automatically organized, so you cannot have a gap in between moves
+        (e.g. [131, 2, 0, 90]). The proper usage is to supply a list shorter
+        than four elements (e.g. [131, 2, 90]). If given a list with a length
+        greater than 4, it will issue a ValueError exception to prevent
+        overwriting important data.
+        """
+        
+        fmt = 'H'
+        offset = 0x28
+        
+        if value is not None:
+            if (isinstance(value, list) == False) or (len(value) > 4):
+                raise TypeError
+            
+            size = 0
+            for item in value:
+                offset += size
+                self._set(fmt, offset, item)
+                
+                size += 2
+            
+            return self.moves
+        
+        moves = [
+            self._get(fmt, offset),
+            self._get(fmt, offset+2),
+            self._get(fmt, offset+4),
+            self._get(fmt, offset+6),
+        ]
+        
+        return moves
     
     def _move_pp(self, value=None):
         "Current move PP."
