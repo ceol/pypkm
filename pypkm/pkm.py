@@ -438,7 +438,10 @@ class Pkm(PkmCore):
             
             return self.language
         
-        return languages[self._get(fmt, offset)]
+        lang_id = self._get(fmt, offset)
+        
+        # search dict by value
+        return [k for k, v in languages.iteritems() if v == lang_id][0]
     
     def _evs(self, value=None):
         "Effort values."
