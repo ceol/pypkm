@@ -184,10 +184,11 @@ class Pkm(PkmCore):
     def __setattr__(self, name, value):
         "Attempt to map any calls to missing attributes to functions."
         
-        new_data = getattr(self, '_' + name)(self, value)
-        self._adddata(new_data)
-        
-        return self._getdata()
+        try:
+            self.__dict__[name] = value
+        except AttributeError:
+            new_data = getattr(self, '_' + name)(self, value)
+            self._adddata(new_data)
     
     def new(self, generation, path=None):
         """Create a blank PKM file to be filled with custom data.
@@ -231,6 +232,7 @@ class Pkm(PkmCore):
         
         data = open(path).read()
         
+        self._file_load_path = path
         self._adddata(data)
         self._setgen(generation)
         
@@ -280,7 +282,16 @@ class Pkm(PkmCore):
     
     def _dex(self, value=None):
         "National Pokédex ID."
-        pass
+        
+        fmt = 'H'
+        offset = 0x08
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.dex
+        
+        return self._get(fmt, offset)
     
     def _item(self, value=None):
         "Held item ID."
