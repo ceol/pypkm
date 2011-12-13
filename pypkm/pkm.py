@@ -288,7 +288,7 @@ class Pkm(PkmCore):
         offset = 0x00
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.pv
         
@@ -297,14 +297,15 @@ class Pkm(PkmCore):
     def _checksum(self, value=None):
         """Checksum.
         
-        This should only be edited when the byte data is changed.
+        This should only be edited when the byte data is changed. Use the
+        appropriate bitutils function to calculate.
         """
         
         fmt = 'H'
         offset = 0x06
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.checksum
         
@@ -317,7 +318,7 @@ class Pkm(PkmCore):
         offset = 0x08
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.dex
         
@@ -330,7 +331,7 @@ class Pkm(PkmCore):
         offset = 0x0A
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.item
         
@@ -343,7 +344,7 @@ class Pkm(PkmCore):
         offset = 0x0C
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.ot_id
         
@@ -356,7 +357,7 @@ class Pkm(PkmCore):
         offset = 0x0E
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.ot_secret_id
         
@@ -369,7 +370,7 @@ class Pkm(PkmCore):
         offset = 0x10
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.exp
         
@@ -382,7 +383,7 @@ class Pkm(PkmCore):
         offset = 0x14
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.happiness
         
@@ -395,7 +396,7 @@ class Pkm(PkmCore):
         offset = 0x15
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.ability
         
@@ -414,7 +415,10 @@ class Pkm(PkmCore):
         }
     
     def _language(self, value=None):
-        "Language."
+        """Language.
+        
+        Expects/returns a two-character string of the language.
+        """
         
         languages = {
             'jp': 0x01,
@@ -425,6 +429,16 @@ class Pkm(PkmCore):
             'es': 0x07,
             'kr': 0x08,
         }
+        
+        fmt = 'B'
+        offset = 0x17
+        
+        if value is not None:
+            self._set(fmt, offset, languages[value])
+            
+            return self.language
+        
+        return languages[self._get(fmt, offset)]
     
     def _evs(self, value=None):
         "Effort values."
@@ -489,7 +503,7 @@ class Pkm(PkmCore):
         offset = 0x5F
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.hometown
         
@@ -518,7 +532,7 @@ class Pkm(PkmCore):
         offset = 0x83
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.pokeball
         
@@ -539,7 +553,7 @@ class Pkm(PkmCore):
         offset = 0x85
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.encounter_type
         
@@ -552,7 +566,7 @@ class Pkm(PkmCore):
         offset = 0x86
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.hgss_pokeball
         
@@ -569,7 +583,7 @@ class Pkm(PkmCore):
         offset = 0x41
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.nature
         
@@ -582,7 +596,7 @@ class Pkm(PkmCore):
         offset = 0x42
         
         if value is not None:
-            data = self._set(fmt, offset, value)
+            self._set(fmt, offset, value)
             
             return self.dw_ability
         
