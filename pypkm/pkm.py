@@ -179,7 +179,7 @@ class Pkm(PkmCore):
     def __getattr__(self, name):
         "Attempt to map any calls to missing attributes to functions."
         
-        return getattr(self, '_' + name)()
+        return object.__getattribute__(self, '_' + name)()
     
     def __setattr__(self, name, value):
         "Attempt to map any calls to missing attributes to functions."
