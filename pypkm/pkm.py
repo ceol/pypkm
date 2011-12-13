@@ -281,7 +281,7 @@ class Pkm(PkmCore):
     def _pv(self, value=None):
         """Personality value.
         
-        Note: Do NOT set this unless you know what you are doing!
+        Note: Do NOT edit this unless you know what you are doing!
         """
         
         fmt = 'L'
@@ -295,8 +295,20 @@ class Pkm(PkmCore):
         return self._get(fmt, offset)
     
     def _checksum(self, value=None):
-        "Checksum."
-        pass
+        """Checksum.
+        
+        This should only be edited when the byte data is changed.
+        """
+        
+        fmt = 'H'
+        offset = 0x06
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.checksum
+        
+        return self._get(fmt, offset)
     
     def _dex(self, value=None):
         "National Pokédex ID."
