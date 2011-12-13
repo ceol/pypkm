@@ -124,6 +124,9 @@ class PkmCore(object):
         if data is None:
             data = self._getdata()
         
+        # Assert little-endian or the system might make longs eight bytes
+        fmt = '<'+fmt
+        
         size = struct.calcsize(fmt)
         unpacked = struct.unpack(fmt, data[offset:offset+size])
         
@@ -142,6 +145,9 @@ class PkmCore(object):
         # Let them supply their own file data!
         if data is None:
             data = self._getdata()
+        
+        # Assert little-endian or the system might make longs eight bytes
+        fmt = '<'+fmt
         
         size = struct.calcsize(fmt)
         packed = struct.pack(fmt, value)
@@ -295,27 +301,81 @@ class Pkm(PkmCore):
     
     def _item(self, value=None):
         "Held item ID."
-        pass
+        
+        fmt = 'H'
+        offset = 0x0A
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.item
+        
+        return self._get(fmt, offset)
     
     def _ot_id(self, value=None):
         "Original trainer ID."
-        pass
+        
+        fmt = 'H'
+        offset = 0x0C
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.ot_id
+        
+        return self._get(fmt, offset)
     
     def _ot_secret_id(self, value=None):
         "Original trainer secret ID."
-        pass
+        
+        fmt = 'H'
+        offset = 0x0E
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.ot_secret_id
+        
+        return self._get(fmt, offset)
     
     def _exp(self, value=None):
         "Experience points total."
-        pass
+        
+        fmt = 'L'
+        offset = 0x10
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.exp
+        
+        return self._get(fmt, offset)
     
     def _happiness(self, value=None):
         "Happiness (or steps to hatch if an egg)."
-        pass
+        
+        fmt = 'B'
+        offset = 0x14
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.happiness
+        
+        return self._get(fmt, offset)
     
     def _ability(self, value=None):
         "Ability ID."
-        pass
+        
+        fmt = 'B'
+        offset = 0x15
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.ability
+        
+        return self._get(fmt, offset)
     
     def _markings(self, value=None):
         "Pokédex markings (I think?)."
@@ -379,11 +439,11 @@ class Pkm(PkmCore):
         pass
     
     def _shiny_leaves(self, value=None):
-        "Shiny leaves (HG/SS-only)."
+        "Shiny leaves. (HG/SS-only)"
         pass
     
     def _leaf_crown(self, value=None):
-        "Leaf Crown (HG/SS-only)."
+        "Leaf Crown. (HG/SS-only)"
         pass
     
     def _egg_location(self, value=None):
@@ -400,7 +460,16 @@ class Pkm(PkmCore):
     
     def _hometown(self, value=None):
         "Pokémon hometown."
-        pass
+        
+        fmt = 'B'
+        offset = 0x5F
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.hometown
+        
+        return self._get(fmt, offset)
     
     def _ot_name(self, value=None):
         "Original trainer name."
@@ -420,7 +489,16 @@ class Pkm(PkmCore):
     
     def _pokeball(self, value=None):
         "Poké Ball ID."
-        pass
+        
+        fmt = 'B'
+        offset = 0x83
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.pokeball
+        
+        return self._get(fmt, offset)
     
     def _met_level(self, value=None):
         "Level at which the Pokémon was met."
@@ -432,20 +510,56 @@ class Pkm(PkmCore):
     
     def _encounter_type(self, value=None):
         "Pokémon encounter type."
-        pass
+        
+        fmt = 'B'
+        offset = 0x85
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.encounter_type
+        
+        return self._get(fmt, offset)
     
     def _hgss_pokeball(self, value=None):
-        "Poké Ball ID specific to HG/SS."
-        pass
+        "Secondary Poké Ball ID. (HG/SS-only)"
+        
+        fmt = 'B'
+        offset = 0x86
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.hgss_pokeball
+        
+        return self._get(fmt, offset)
     
     def _level(self, value=None):
         "Level."
         pass
     
+    def _nature(self, value=None):
+        "Nature. (B/W-only)"
+        
+        fmt = 'B'
+        offset = 0x41
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.nature
+        
+        return self._get(fmt, offset)
+    
     def _dw_ability(self, value=None):
         "Dream World ability flag."
-        pass
-    
-    def _nature(self, value=None):
-        "Nature (B/W-only)."
-        pass
+        
+        fmt = 'B'
+        offset = 0x42
+        
+        if value is not None:
+            data = self._set(fmt, offset, value)
+            
+            return self.dw_ability
+        
+        return self._get(fmt, offset)
