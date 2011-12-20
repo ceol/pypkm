@@ -44,14 +44,9 @@ from bitutils import setbit, getbit, clearbit # setting/getting certain flags
 #from bitutils import checksum, shuffle
 
 class PkmCore(object):
-    """Core PKM file manipulation functions.
+    """Core PKM file data manipulation functions.
     
-    These functions are more specific to PKM files but will be— for the most
-    part— abstracted out in the Pkm class. Because of this, they should not
-    be called directly, so I've prefaced each with an underscore to signify
-    that.
-    
-    The plan for file manipulation is to unpack the part that needs to be
+    The plan for data manipulation is to unpack the part that needs to be
     edited, insert the new value, and pack the file back up each time. Since
     the files are extremely small, the overhead should not be much greater
     than unpacking the entire file, doing all the editing, and then packing
@@ -163,22 +158,24 @@ class PkmCore(object):
         
         return self._getdata()
     
-    def _encrypt(self):
-        "Encrypt the loaded PKM data."
-        pass
-    
-    def _decrypt(self):
-        "Decrypt the loaded PKM data."
-        pass
+    def _getset(self, attr, fmt, offset, value):
+        "Common attribute get/set logic."
+        
+        if value is not None:
+            self._set(fmt, offset, value)
+            
+            return getattr(self, attr)
+        
+        return self._get(fmt, offset)
 
-class PkmAttr(object):
+class PkmAttr(PkmCore):
     """Functions used to map attribute calls."""
     
     def __getattr__(self, name):
         "Attempt to map any calls to missing attributes to functions."
         
         try:
-            func_name = '{}{}'.format('_', name)
+            func_name = '{}{}'.format('attr__', name)
             return object.__getattribute__(self, func_name)()
         except AttributeError:
             error = "'{}' object has no attribute '{}'".format(self.__class__.__name__, name)
@@ -193,17 +190,7 @@ class PkmAttr(object):
             new_data = getattr(self, '_' + name)(self, value)
             self._adddata(new_data)
     
-    def _getset(self, attr, fmt, offset, value):
-        "Common attribute get/set logic."
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return getattr(self, attr)
-        
-        return self._get(fmt, offset)
-    
-    def _pv(self, value=None):
+    def attr__pv(self, value=None):
         """Personality value.
         
         Note: Do NOT edit this unless you know what you are doing!
@@ -211,7 +198,7 @@ class PkmAttr(object):
         
         return self._getset('pv', fmt='L', offset=0x00, value=value)
             
-    def _checksum(self, value=None):
+    def attr__checksum(self, value=None):
         """Checksum.
         
         This should only be edited when the byte data is changed. Use the
@@ -220,42 +207,42 @@ class PkmAttr(object):
         
         return self._getset('checksum', fmt='H', offset=0x06, value=value)
     
-    def _dex(self, value=None):
+    def attr__dex(self, value=None):
         "National Pokédex ID."
         
         return self._getset('dex', fmt='H', offset=0x08, value=value)
     
-    def _item(self, value=None):
+    def attr__item(self, value=None):
         "Held item ID."
         
         return self._getset('item', fmt='H', offset=0x0A, value=value)
     
-    def _ot_id(self, value=None):
+    def attr__ot_id(self, value=None):
         "Original trainer ID."
         
         return self._getset('ot_id', fmt='H', offset=0x0C, value=value)
     
-    def _ot_secret_id(self, value=None):
+    def attr__ot_secret_id(self, value=None):
         "Original trainer secret ID."
         
         return self._getset('ot_secret_id', fmt='H', offset=0x0E, value=value)
     
-    def _exp(self, value=None):
+    def attr__exp(self, value=None):
         "Experience points total."
         
         return self._getset('exp', fmt='L', offset=0x10, value=value)
     
-    def _happiness(self, value=None):
+    def attr__happiness(self, value=None):
         "Happiness (or steps to hatch if an egg)."
         
         return self._getset('happiness', fmt='B', offset=0x14, value=value)
     
-    def _ability(self, value=None):
+    def attr__ability(self, value=None):
         "Ability ID."
         
         return self._getset('ability', fmt='B', offset=0x15, value=value)
     
-    def _markings(self, value=None):
+    def attr__markings(self, value=None):
         "Pokédex markings. (I think?)"
         
         markings = {
@@ -267,7 +254,7 @@ class PkmAttr(object):
             'diamond': 0x20,
         }
     
-    def _language(self, value=None):
+    def attr__language(self, value=None):
         """Language.
         
         Expects/returns a two-character string of the language.
@@ -288,137 +275,137 @@ class PkmAttr(object):
         # search dict by value
         return [k for k, v in languages.iteritems() if v == lang_id][0]
     
-    def _evs(self, value=None):
+    def attr__evs(self, value=None):
         "Effort values."
         pass
     
-    def _cvs(self, value=None):
+    def attr__cvs(self, value=None):
         "Contest values."
         pass
     
-    def _ribbons(self, value=None):
+    def attr__ribbons(self, value=None):
         "Hoenn and Sinnoh ribbon sets."
         pass
     
-    def _move1(self, value=None):
+    def attr__move1(self, value=None):
         "Move #1 ID."
         
         return self._getset('move1', fmt='H', offset=0x28, value=value)
     
-    def _move2(self, value=None):
+    def attr__move2(self, value=None):
         "Move #2 ID."
         
         return self._getset('move2', fmt='H', offset=0x2A, value=value)
     
-    def _move3(self, value=None):
+    def attr__move3(self, value=None):
         "Move #3 ID."
         
         return self._getset('move3', fmt='H', offset=0x2C, value=value)
     
-    def _move4(self, value=None):
+    def attr__move4(self, value=None):
         "Move #4 ID."
         
         return self._getset('move4', fmt='H', offset=0x2E, value=value)
     
-    def _move_pp(self, value=None):
+    def attr__move_pp(self, value=None):
         "Current move PP."
         pass
     
-    def _move_ppup(self, value=None):
+    def attr__move_ppup(self, value=None):
         "Move PP-Ups."
         pass
     
-    def _ivs(self, value=None):
+    def attr__ivs(self, value=None):
         "Individual values."
         pass
     
-    def _fateful_encounter(self, value=None):
+    def attr__fateful_encounter(self, value=None):
         "Fateful encounter flag."
         pass
     
-    def _gender(self, value=None):
+    def attr__gender(self, value=None):
         "Pokémon gender."
         pass
     
-    def _shiny_leaves(self, value=None):
+    def attr__shiny_leaves(self, value=None):
         "Shiny leaves. (HG/SS-only)"
         pass
     
-    def _leaf_crown(self, value=None):
+    def attr__leaf_crown(self, value=None):
         "Leaf Crown. (HG/SS-only)"
         pass
     
-    def _egg_location(self, value=None):
+    def attr__egg_location(self, value=None):
         "Location where the egg was received."
         pass
     
-    def _met_location(self, value=None):
+    def attr__met_location(self, value=None):
         "Location where the Pokémon was met."
         pass
     
-    def _nickname(self, value=None):
+    def attr__nickname(self, value=None):
         "Pokémon nickname."
         pass
     
-    def _hometown(self, value=None):
+    def attr__hometown(self, value=None):
         "Pokémon hometown."
         
         return self._getset('hometown', fmt='B', offset=0x5F, value=value)
     
-    def _ot_name(self, value=None):
+    def attr__ot_name(self, value=None):
         "Original trainer name."
         pass
     
-    def _egg_date(self, value=None):
+    def attr__egg_date(self, value=None):
         "Date when the egg was received."
         pass
     
-    def _met_date(self, value=None):
+    def attr__met_date(self, value=None):
         "Date when the Pokémon was met."
         pass
     
-    def _pokerus(self, value=None):
+    def attr__pokerus(self, value=None):
         "Pokérus flag."
         pass
     
-    def _ball(self, value=None):
+    def attr__ball(self, value=None):
         "Poké Ball ID."
         
         return self._getset('ball', fmt='B', offset=0x83, value=value)
     
-    def _met_level(self, value=None):
+    def attr__met_level(self, value=None):
         "Level at which the Pokémon was met."
         pass
     
-    def _ot_gender(self, value=None):
+    def attr__ot_gender(self, value=None):
         "Original trainer gender."
         pass
     
-    def _encounter_type(self, value=None):
+    def attr__encounter_type(self, value=None):
         "Pokémon encounter type."
         
         return self._getset('encounter_type', fmt='B', offset=0x85, value=value)
     
-    def _hgss_ball(self, value=None):
+    def attr__hgss_ball(self, value=None):
         "Secondary Poké Ball ID. (HG/SS-only)"
         
         return self._getset('hgss_ball', fmt='B', offset=0x86, value=value)
     
-    def _level(self, value=None):
-        "Level."
-        pass
-    
-    def _nature(self, value=None):
+    def attr__nature(self, value=None):
         "Nature. (B/W-only)"
         
         return self._getset('nature', fmt='B', offset=0x41, value=value)
     
-    def _dw_ability(self, value=None):
+    def attr__dw_ability(self, value=None):
         "Dream World ability flag. (B/W-only)"
         
         return self._getset('dw_ability', fmt='B', offset=0x42, value=value)
+    
+    def attr__level(self, value=None):
+        "Level."
+        pass
 
-class Pkm(PkmCore, PkmAttr):
+class Pkm(PkmAttr):
     """User-friendly PKM file manipulation API.
     
     These functions enable a clear and coherent way to edit PKM files instead
