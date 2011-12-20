@@ -455,41 +455,57 @@ class Pkm(PkmCore):
         "Hoenn and Sinnoh ribbon sets."
         pass
     
-    def _moves(self, value=None):
-        """Moveset IDs.
-        
-        Expects/returns a list of moves. In Pokémon games, moves are
-        automatically organized, so you cannot have a gap in between moves
-        (e.g. [131, 2, 0, 90]). The proper usage is to supply a list shorter
-        than four elements (e.g. [131, 2, 90]). If given a list with a length
-        greater than 4, it will issue a ValueError exception to prevent
-        overwriting important data.
-        """
+    def _move1(self, value=None):
+        "Move #1 ID."
         
         fmt = 'H'
         offset = 0x28
         
         if value is not None:
-            if (isinstance(value, list) == False) or (len(value) > 4):
-                raise TypeError
+            self._set(fmt, offset, value)
             
-            size = 0
-            for item in value:
-                offset += size
-                self._set(fmt, offset, item)
-                
-                size += 2
+            return self.move1
+        
+        return self._get(fmt, offset)
+    
+    def _move2(self, value=None):
+        "Move #2 ID."
+        
+        fmt = 'H'
+        offset = 0x2A
+        
+        if value is not None:
+            self._set(fmt, offset, value)
             
-            return self.moves
+            return self.move2
         
-        moves = [
-            self._get(fmt, offset),
-            self._get(fmt, offset+2),
-            self._get(fmt, offset+4),
-            self._get(fmt, offset+6),
-        ]
+        return self._get(fmt, offset)
+    
+    def _move3(self, value=None):
+        "Move #3 ID."
         
-        return moves
+        fmt = 'H'
+        offset = 0x2C
+        
+        if value is not None:
+            self._set(fmt, offset, value)
+            
+            return self.move3
+        
+        return self._get(fmt, offset)
+    
+    def _move4(self, value=None):
+        "Move #4 ID."
+        
+        fmt = 'H'
+        offset = 0x2E
+        
+        if value is not None:
+            self._set(fmt, offset, value)
+            
+            return self.move4
+        
+        return self._get(fmt, offset)
     
     def _move_pp(self, value=None):
         "Current move PP."
