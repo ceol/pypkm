@@ -78,7 +78,7 @@ class PkmCore(object):
     def _getdata(self):
         "Retrieve the current working data."
         
-        return self._file_edit_history.pop()
+        return self._file_edit_history[-1]
     
     def _adddata(self, data):
         """Add a node of current working data.
@@ -209,7 +209,7 @@ class Pkm(PkmCore):
         """
         pass
     
-    def load_from_data(self, data, generation):
+    def load_from_data(self, generation, data):
         """Load a PKM file from raw data to be edited.
         
         Keyword arguments:
@@ -276,6 +276,16 @@ class Pkm(PkmCore):
         
         return self
     
+    def __common(self, attr, fmt, offset, value):
+        "Common attribute logic."
+        
+        if value is not None:
+            self._set(fmt, offset, value)
+            
+            return getattr(self, attr)
+        
+        return self._get(fmt, offset)
+    
     # Attribute functions.
     
     def _pv(self, value=None):
@@ -284,7 +294,7 @@ class Pkm(PkmCore):
         Note: Do NOT edit this unless you know what you are doing!
         """
         
-        fmt = 'L'
+        """fmt = 'L'
         offset = 0x00
         
         if value is not None:
@@ -292,7 +302,9 @@ class Pkm(PkmCore):
             
             return self.pv
         
-        return self._get(fmt, offset)
+        return self._get(fmt, offset)"""
+        
+        return self.__common('pv', 'L', 0x00, value)
     
     def _checksum(self, value=None):
         """Checksum.
