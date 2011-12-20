@@ -178,7 +178,8 @@ class PkmAttr(object):
         "Attempt to map any calls to missing attributes to functions."
         
         try:
-            return object.__getattribute__(self, '_' + name)()
+            func_name = '{}{}'.format('_', name)
+            return object.__getattribute__(self, func_name)()
         except AttributeError:
             error = "'{}' object has no attribute '{}'".format(self.__class__.__name__, name)
             raise AttributeError(error)
@@ -192,8 +193,8 @@ class PkmAttr(object):
             new_data = getattr(self, '_' + name)(self, value)
             self._adddata(new_data)
     
-    def _common(self, attr, fmt, offset, value):
-        "Common attribute logic."
+    def _getset(self, attr, fmt, offset, value):
+        "Common attribute get/set logic."
         
         if value is not None:
             self._set(fmt, offset, value)
@@ -208,15 +209,7 @@ class PkmAttr(object):
         Note: Do NOT edit this unless you know what you are doing!
         """
         
-        fmt = 'L'
-        offset = 0x00
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.pv
-        
-        return self._get(fmt, offset)
+        return self._getset('pv', fmt='L', offset=0x00, value=value)
             
     def _checksum(self, value=None):
         """Checksum.
@@ -225,109 +218,45 @@ class PkmAttr(object):
         appropriate bitutils function to calculate.
         """
         
-        fmt = 'H'
-        offset = 0x06
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.checksum
-        
-        return self._get(fmt, offset)
+        return self._getset('checksum', fmt='H', offset=0x06, value=value)
     
     def _dex(self, value=None):
         "National Pokédex ID."
         
-        fmt = 'H'
-        offset = 0x08
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.dex
-        
-        return self._get(fmt, offset)
+        return self._getset('dex', fmt='H', offset=0x08, value=value)
     
     def _item(self, value=None):
         "Held item ID."
         
-        fmt = 'H'
-        offset = 0x0A
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.item
-        
-        return self._get(fmt, offset)
+        return self._getset('item', fmt='H', offset=0x0A, value=value)
     
     def _ot_id(self, value=None):
         "Original trainer ID."
         
-        fmt = 'H'
-        offset = 0x0C
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.ot_id
-        
-        return self._get(fmt, offset)
+        return self._getset('ot_id', fmt='H', offset=0x0C, value=value)
     
     def _ot_secret_id(self, value=None):
         "Original trainer secret ID."
         
-        fmt = 'H'
-        offset = 0x0E
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.ot_secret_id
-        
-        return self._get(fmt, offset)
+        return self._getset('ot_secret_id', fmt='H', offset=0x0E, value=value)
     
     def _exp(self, value=None):
         "Experience points total."
         
-        fmt = 'L'
-        offset = 0x10
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.exp
-        
-        return self._get(fmt, offset)
+        return self._getset('exp', fmt='L', offset=0x10, value=value)
     
     def _happiness(self, value=None):
         "Happiness (or steps to hatch if an egg)."
         
-        fmt = 'B'
-        offset = 0x14
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.happiness
-        
-        return self._get(fmt, offset)
+        return self._getset('happiness', fmt='B', offset=0x14, value=value)
     
     def _ability(self, value=None):
         "Ability ID."
         
-        fmt = 'B'
-        offset = 0x15
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.ability
-        
-        return self._get(fmt, offset)
+        return self._getset('ability', fmt='B', offset=0x15, value=value)
     
     def _markings(self, value=None):
-        "Pokédex markings (I think?)."
+        "Pokédex markings. (I think?)"
         
         markings = {
             'circle': 0x01,
@@ -354,15 +283,7 @@ class PkmAttr(object):
             'kr': 0x08,
         }
         
-        fmt = 'B'
-        offset = 0x17
-        
-        if value is not None:
-            self._set(fmt, offset, languages[value])
-            
-            return self.language
-        
-        lang_id = self._get(fmt, offset)
+        lang_id = self._getset('language', fmt='B', offset=0x17, value=languages[value])
         
         # search dict by value
         return [k for k, v in languages.iteritems() if v == lang_id][0]
@@ -382,54 +303,22 @@ class PkmAttr(object):
     def _move1(self, value=None):
         "Move #1 ID."
         
-        fmt = 'H'
-        offset = 0x28
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.move1
-        
-        return self._get(fmt, offset)
+        return self._getset('move1', fmt='H', offset=0x28, value=value)
     
     def _move2(self, value=None):
         "Move #2 ID."
         
-        fmt = 'H'
-        offset = 0x2A
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.move2
-        
-        return self._get(fmt, offset)
+        return self._getset('move2', fmt='H', offset=0x2A, value=value)
     
     def _move3(self, value=None):
         "Move #3 ID."
         
-        fmt = 'H'
-        offset = 0x2C
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.move3
-        
-        return self._get(fmt, offset)
+        return self._getset('move3', fmt='H', offset=0x2C, value=value)
     
     def _move4(self, value=None):
         "Move #4 ID."
         
-        fmt = 'H'
-        offset = 0x2E
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.move4
-        
-        return self._get(fmt, offset)
+        return self._getset('move4', fmt='H', offset=0x2E, value=value)
     
     def _move_pp(self, value=None):
         "Current move PP."
@@ -474,15 +363,7 @@ class PkmAttr(object):
     def _hometown(self, value=None):
         "Pokémon hometown."
         
-        fmt = 'B'
-        offset = 0x5F
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.hometown
-        
-        return self._get(fmt, offset)
+        return self._getset('hometown', fmt='B', offset=0x5F, value=value)
     
     def _ot_name(self, value=None):
         "Original trainer name."
@@ -503,15 +384,7 @@ class PkmAttr(object):
     def _ball(self, value=None):
         "Poké Ball ID."
         
-        fmt = 'B'
-        offset = 0x83
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.pokeball
-        
-        return self._get(fmt, offset)
+        return self._getset('ball', fmt='B', offset=0x83, value=value)
     
     def _met_level(self, value=None):
         "Level at which the Pokémon was met."
@@ -524,28 +397,12 @@ class PkmAttr(object):
     def _encounter_type(self, value=None):
         "Pokémon encounter type."
         
-        fmt = 'B'
-        offset = 0x85
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.encounter_type
-        
-        return self._get(fmt, offset)
+        return self._getset('encounter_type', fmt='B', offset=0x85, value=value)
     
     def _hgss_ball(self, value=None):
         "Secondary Poké Ball ID. (HG/SS-only)"
         
-        fmt = 'B'
-        offset = 0x86
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.hgss_pokeball
-        
-        return self._get(fmt, offset)
+        return self._getset('hgss_ball', fmt='B', offset=0x86, value=value)
     
     def _level(self, value=None):
         "Level."
@@ -554,28 +411,12 @@ class PkmAttr(object):
     def _nature(self, value=None):
         "Nature. (B/W-only)"
         
-        fmt = 'B'
-        offset = 0x41
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.nature
-        
-        return self._get(fmt, offset)
+        return self._getset('nature', fmt='B', offset=0x41, value=value)
     
     def _dw_ability(self, value=None):
         "Dream World ability flag. (B/W-only)"
         
-        fmt = 'B'
-        offset = 0x42
-        
-        if value is not None:
-            self._set(fmt, offset, value)
-            
-            return self.dw_ability
-        
-        return self._get(fmt, offset)
+        return self._getset('dw_ability', fmt='B', offset=0x42, value=value)
 
 class Pkm(PkmCore, PkmAttr):
     """User-friendly PKM file manipulation API.
