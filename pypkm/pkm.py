@@ -185,7 +185,11 @@ class Pkm(PkmCore):
     def __getattr__(self, name):
         "Attempt to map any calls to missing attributes to functions."
         
-        return object.__getattribute__(self, '_' + name)()
+        try:
+            return object.__getattribute__(self, '_' + name)()
+        except AttributeError:
+            error = "'{}' object has no attribute '{}'".format(self.__class__.__name__, name)
+            raise AttributeError(error)
     
     def __setattr__(self, name, value):
         "Attempt to map any calls to missing attributes to functions."
@@ -276,7 +280,7 @@ class Pkm(PkmCore):
         
         return self
     
-    def __common(self, attr, fmt, offset, value):
+    def _common(self, attr, fmt, offset, value):
         "Common attribute logic."
         
         if value is not None:
@@ -294,7 +298,7 @@ class Pkm(PkmCore):
         Note: Do NOT edit this unless you know what you are doing!
         """
         
-        """fmt = 'L'
+        fmt = 'L'
         offset = 0x00
         
         if value is not None:
@@ -302,10 +306,8 @@ class Pkm(PkmCore):
             
             return self.pv
         
-        return self._get(fmt, offset)"""
-        
-        return self.__common('pv', 'L', 0x00, value)
-    
+        return self._get(fmt, offset)
+            
     def _checksum(self, value=None):
         """Checksum.
         
@@ -588,7 +590,7 @@ class Pkm(PkmCore):
         "Pokérus flag."
         pass
     
-    def _pokeball(self, value=None):
+    def _ball(self, value=None):
         "Poké Ball ID."
         
         fmt = 'B'
@@ -622,7 +624,7 @@ class Pkm(PkmCore):
         
         return self._get(fmt, offset)
     
-    def _hgss_pokeball(self, value=None):
+    def _hgss_ball(self, value=None):
         "Secondary Poké Ball ID. (HG/SS-only)"
         
         fmt = 'B'
