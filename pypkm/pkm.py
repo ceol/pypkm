@@ -171,16 +171,8 @@ class PkmCore(object):
         "Decrypt the loaded PKM data."
         pass
 
-class Pkm(PkmCore):
-    """User-friendly PKM file manipulation API.
-    
-    These functions enable a clear and coherent way to edit PKM files instead
-    of the developer manipulating raw bytes and dealing with endianness. I'd
-    like to organize it similar to an ORM.
-    """
-    
-    def __init__(self):
-        pass
+class PkmAttr(object):
+    """Functions used to map attribute calls."""
     
     def __getattr__(self, name):
         "Attempt to map any calls to missing attributes to functions."
@@ -200,86 +192,6 @@ class Pkm(PkmCore):
             new_data = getattr(self, '_' + name)(self, value)
             self._adddata(new_data)
     
-    def new(self, generation, path=None):
-        """Create a blank PKM file to be filled with custom data.
-        
-        Keyword arguments:
-        path (string) -- the path to the file to create (optional)
-        generation (int) -- the file's game generation (4 or 5)
-        
-        If you do not supply a save path here, you must supply one if you
-        call save(). Note: there is no need to call the load() function after
-        calling new().
-        """
-        pass
-    
-    def load_from_data(self, generation, data):
-        """Load a PKM file from raw data to be edited.
-        
-        Keyword arguments:
-        data (string) -- the raw file data
-        generation (int) -- the file's game generation (4 or 5)
-        
-        Note: if you load raw data, you must supply a path to the save()
-        method.
-        """
-        
-        self._adddata(data)
-        self._setgen(generation)
-        
-        return self
-    
-    def load_from_path(self, generation, path):
-        """Load a PKM file from raw data to be edited.
-        
-        Keyword arguments:
-        path (string) -- the path to the file to load
-        generation (int) -- the file's game generation (4 or 5)
-        
-        Note: refer to save()'s documentation for what happens when you load
-        from a path and save.
-        """
-        
-        data = open(path).read()
-        
-        self._file_load_path = path
-        self._adddata(data)
-        self._setgen(generation)
-        
-        return self
-    
-    def save(self, path=None):
-        """Save the most recent changes.
-        
-        Keyword arguments:
-        path (string) -- the path to the file to save
-        
-        This will save changes to either a separate file in the
-        _file_load_path directory or to a user-supplied path. Make sure, if
-        you're supplying a path, to give a path to the file and not just the
-        directory.
-        
-        Ex:
-            # creates a new pkm file
-            pkm = Pkm.new(generation=5)
-            
-            # saves to current working directory
-            pkm.save('gengar.pkm')
-            
-            # loads the existing pkm file
-            pkm = Pkm.load_from_path('gengar.pkm', generation=5)
-            
-            # saves to a new file in the same directory (./gengar_new.pkm)
-            pkm.save()
-        """
-        
-        data = self._getdata()
-        
-        with open(path, 'w') as f:
-            f.write(data)
-        
-        return self
-    
     def _common(self, attr, fmt, offset, value):
         "Common attribute logic."
         
@@ -289,8 +201,6 @@ class Pkm(PkmCore):
             return getattr(self, attr)
         
         return self._get(fmt, offset)
-    
-    # Attribute functions.
     
     def _pv(self, value=None):
         """Personality value.
@@ -666,3 +576,94 @@ class Pkm(PkmCore):
             return self.dw_ability
         
         return self._get(fmt, offset)
+
+class Pkm(PkmCore, PkmAttr):
+    """User-friendly PKM file manipulation API.
+    
+    These functions enable a clear and coherent way to edit PKM files instead
+    of the developer manipulating raw bytes and dealing with endianness. I'd
+    like to organize it similar to an ORM.
+    """
+    
+    def __init__(self):
+        pass
+    
+    def new(self, generation, path=None):
+        """Create a blank PKM file to be filled with custom data.
+        
+        Keyword arguments:
+        path (string) -- the path to the file to create (optional)
+        generation (int) -- the file's game generation (4 or 5)
+        
+        If you do not supply a save path here, you must supply one if you
+        call save(). Note: there is no need to call the load() function after
+        calling new().
+        """
+        pass
+    
+    def load_from_data(self, generation, data):
+        """Load a PKM file from raw data to be edited.
+        
+        Keyword arguments:
+        data (string) -- the raw file data
+        generation (int) -- the file's game generation (4 or 5)
+        
+        Note: if you load raw data, you must supply a path to the save()
+        method.
+        """
+        
+        self._adddata(data)
+        self._setgen(generation)
+        
+        return self
+    
+    def load_from_path(self, generation, path):
+        """Load a PKM file from raw data to be edited.
+        
+        Keyword arguments:
+        path (string) -- the path to the file to load
+        generation (int) -- the file's game generation (4 or 5)
+        
+        Note: refer to save()'s documentation for what happens when you load
+        from a path and save.
+        """
+        
+        data = open(path).read()
+        
+        self._file_load_path = path
+        self._adddata(data)
+        self._setgen(generation)
+        
+        return self
+    
+    def save(self, path=None):
+        """Save the most recent changes.
+        
+        Keyword arguments:
+        path (string) -- the path to the file to save
+        
+        This will save changes to either a separate file in the
+        _file_load_path directory or to a user-supplied path. Make sure, if
+        you're supplying a path, to give a path to the file and not just the
+        directory.
+        
+        Ex:
+            # creates a new pkm file
+            pkm = Pkm.new(generation=5)
+            
+            # saves to current working directory
+            pkm.save('gengar.pkm')
+            
+            # loads the existing pkm file
+            pkm = Pkm.load_from_path('gengar.pkm', generation=5)
+            
+            # saves to a new file in the same directory (./gengar_new.pkm)
+            pkm.save()
+        """
+        
+        data = self._getdata()
+        
+        with open(path, 'w') as f:
+            f.write(data)
+        
+        return self
