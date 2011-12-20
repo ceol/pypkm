@@ -187,7 +187,7 @@ class PkmAttr(PkmCore):
         try:
             self.__dict__[name] = value
         except AttributeError:
-            new_data = getattr(self, '_' + name)(self, value)
+            new_data = getattr(self, 'attr__' + name)(self, value)
             self._adddata(new_data)
     
     def attr__pv(self, value=None):
