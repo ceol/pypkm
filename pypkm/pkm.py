@@ -246,12 +246,12 @@ class PkmAttr(PkmCore):
         "Pokédex markings. (I think?)"
         
         markings = {
-            'circle': 0x01,
-            'triangle': 0x02,
-            'square': 0x04,
-            'heart': 0x08,
-            'star': 0x10,
-            'diamond': 0x20,
+            0x01: 'circle',
+            0x02: 'triangle',
+            0x04: 'square',
+            0x08: 'heart',
+            0x10: 'star',
+            0x20: 'diamond',
         }
     
     def attr__language(self, value=None):
@@ -260,20 +260,18 @@ class PkmAttr(PkmCore):
         Expects/returns a two-character string of the language.
         """
         
+        # Currently not used in favor of returning the raw value
         languages = {
-            'jp': 0x01,
-            'en': 0x02,
-            'fr': 0x03,
-            'it': 0x04,
-            'de': 0x05,
-            'es': 0x07,
-            'kr': 0x08,
+            0x01: 'jp',
+            0x02: 'en',
+            0x03: 'fr',
+            0x04: 'it',
+            0x05: 'de',
+            0x07: 'es',
+            0x08: 'kr',
         }
         
-        lang_id = self._getset('language', fmt='B', offset=0x17, value=languages[value])
-        
-        # search dict by value
-        return [k for k, v in languages.iteritems() if v == lang_id][0]
+        return self._getset('language', fmt='B', offset=0x17, value=value)
     
     def attr__evs(self, value=None):
         "Effort values."
