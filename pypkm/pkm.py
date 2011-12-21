@@ -255,10 +255,7 @@ class PkmAttr(PkmCore):
         }
     
     def attr__language(self, value=None):
-        """Language.
-        
-        Expects/returns a two-character string of the language.
-        """
+        "Language ID."
         
         # Currently not used in favor of returning the raw value
         languages = {
@@ -273,13 +270,65 @@ class PkmAttr(PkmCore):
         
         return self._getset('language', fmt='B', offset=0x17, value=value)
     
-    def attr__evs(self, value=None):
-        "Effort values."
-        pass
+    def attr__hp_ev(self, value=None):
+        "Hit points effort value."
+        
+        return self._getset('hp_ev', fmt='B', offset=0x18, value=value)
     
-    def attr__cvs(self, value=None):
-        "Contest values."
-        pass
+    def attr__atk_ev(self, value=None):
+        "Attack effort value."
+        
+        return self._getset('atk_ev', fmt='B', offset=0x19, value=value)
+    
+    def attr__def_ev(self, value=None):
+        "Defense effort value."
+        
+        return self._getset('def_ev', fmt='B', offset=0x1A, value=value)
+    
+    def attr__spe_ev(self, value=None):
+        "Speed effort value."
+        
+        return self._getset('spe_ev', fmt='B', offset=0x1B, value=value)
+    
+    def attr__spa_ev(self, value=None):
+        "Special attack effort value."
+        
+        return self._getset('spa_ev', fmt='B', offset=0x1C, value=value)
+    
+    def attr__spd_ev(self, value=None):
+        "Special defense effort value."
+        
+        return self._getset('spd_ev', fmt='B', offset=0x1D, value=value)
+    
+    def attr__cool_cv(self, value=None):
+        "Cool contest value."
+        
+        return self._getset('cool_cv', fmt='B', offset=0x1E, value=value)
+    
+    def attr__beauty_cv(self, value=None):
+        "Beauty contest value."
+        
+        return self._getset('beauty_cv', fmt='B', offset=0x1F, value=value)
+    
+    def attr__cute_cv(self, value=None):
+        "Cute contest value."
+        
+        return self._getset('cute_cv', fmt='B', offset=0x20, value=value)
+    
+    def attr__smart_cv(self, value=None):
+        "Smart contest value."
+        
+        return self._getset('smart_cv', fmt='B', offset=0x21, value=value)
+    
+    def attr__tough_cv(self, value=None):
+        "Tough contest value."
+        
+        return self._getset('tough_cv', fmt='B', offset=0x22, value=value)
+    
+    def attr__sheen_cv(self, value=None):
+        "Sheen contest value."
+        
+        return self._getset('sheen_cv', fmt='B', offset=0x23, value=value)
     
     def attr__ribbons(self, value=None):
         "Hoenn and Sinnoh ribbon sets."
