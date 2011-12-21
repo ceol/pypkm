@@ -34,14 +34,15 @@ IRC channel.
 
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
+import os # filename functions
 import struct  # getting/setting data
 import sqlite3 # creating battle data and gen 4 text encoding
-from bitutils import setbit, getbit, clearbit # setting/getting certain flags
+from pypkm.util import setbit, getbit, clearbit # setting/getting certain flags
 
 # Encryption/decryption functions
 #from array import array
-#import rng
-#from bitutils import checksum, shuffle
+#import pypkm.rng as rng
+from pypkm.util import checksum#, shuffle
 
 class PkmCore(object):
     """Core PKM file data manipulation functions.
@@ -167,6 +168,14 @@ class PkmCore(object):
             return getattr(self, attr)
         
         return self._get(fmt, offset)
+    
+    def _checksumdata(self, data=None):
+        "Returns the appropriate slice for calculating the checksum."
+        
+        if data is None:
+            data = self._getdata()
+        
+        return data[0x08:0x88]
 
 class PkmAttr(PkmCore):
     """Functions used to map attribute calls."""
@@ -535,6 +544,17 @@ class Pkm(PkmAttr):
             # saves to a new file in the same directory (./gengar_new.pkm)
             pkm.save()
         """
+        
+        if path is None:
+            if self._file_load_path is None:
+                raise AttributeError('invalid save path')
+            
+            filename, fileext = os.path.splitext(self._file_load_path)
+            path = filename + '_new' + fileext
+        
+        # Make sure the checksum is correct or encryption/decryption
+        # functions won't work!
+        self.checksum = checksum(self._checksumdata())
         
         data = self._getdata()
         
