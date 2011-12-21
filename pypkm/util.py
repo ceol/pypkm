@@ -34,7 +34,7 @@ def checksum(data, size='H'):
     games use.
     """
     
-    data = array(size, data.tostring())
+    data = array(size, data)
     chksum = 0
     
     for word in data:
