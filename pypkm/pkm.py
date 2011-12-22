@@ -443,10 +443,28 @@ class PkmAttr(PkmCore):
         }
 
         if value is not None:
-            pass
+            # @see http://www.daniweb.com/software-development/python/code/217019
+            #gender_bits = [key for key, val in genders.iteritems() if val == value][0]
+            gender_byte = self._get('B', 0x40)
+
+            if value == 'm':
+                new_byte = setbit(gender_byte, 1)
+                new_byte = setbit(new_byte, 2)
+            elif value == 'f':
+                new_byte = setbit(gender_byte, 1)
+                new_byte = clearbit(new_byte, 2)
+            elif value == 'n':
+                new_byte = clearbit(gender_byte, 1)
+                new_byte = setbit(new_byte, 2)
+            else:
+                raise ValueError('invalid gender value')
+
+            self._set('B', 0x40, new_byte)
+            
+            return self.gender
         
         gender_byte = self._get('B', 0x40)
-        gender_id = (gender_byte >> 1) & 0x3
+        gender_id = (gender_byte & 0x6) >> 1
 
         return genders[gender_id]
     
