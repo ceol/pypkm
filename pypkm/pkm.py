@@ -435,7 +435,20 @@ class PkmAttr(PkmCore):
     
     def attr__gender(self, value=None):
         "Pokémon gender."
-        pass
+        
+        genders = {
+            0b11: 'm', # male
+            0b01: 'f', # female
+            0b10: 'n', # genderless
+        }
+
+        if value is not None:
+            pass
+        
+        gender_byte = self._get('B', 0x40)
+        gender_id = (gender_byte >> 1) & 0x3
+
+        return genders[gender_id]
     
     def attr__shiny_leaves(self, value=None):
         "Shiny leaves. (HG/SS-only)"
