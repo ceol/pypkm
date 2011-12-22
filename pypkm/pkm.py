@@ -244,10 +244,10 @@ class PkmAttr(PkmCore):
         
         return self._getset('checksum', fmt='H', offset=0x06, value=value)
     
-    def attr__dex(self, value=None):
+    def attr__id(self, value=None):
         "National Pokédex ID."
         
-        return self._getset('dex', fmt='H', offset=0x08, value=value)
+        return self._getset('id', fmt='H', offset=0x08, value=value)
     
     def attr__item(self, value=None):
         "Held item ID."
