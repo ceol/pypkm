@@ -121,7 +121,7 @@ class PkmCore(object):
             data = self._getdata()
         
         # Assert little-endian or the system might make longs eight bytes
-        fmt = '<'+fmt
+        fmt = '<' + fmt
         
         size = struct.calcsize(fmt)
         unpacked = struct.unpack(fmt, data[offset:offset+size])
@@ -143,7 +143,7 @@ class PkmCore(object):
             data = self._getdata()
         
         # Assert little-endian or the system might make longs eight bytes
-        fmt = '<'+fmt
+        fmt = '<' + fmt
         
         size = struct.calcsize(fmt)
         packed = struct.pack(fmt, value)
@@ -159,15 +159,44 @@ class PkmCore(object):
         
         return self._getdata()
     
-    def _getset(self, attr, fmt, offset, value):
-        "Common attribute get/set logic."
+    def _getset(self, attr, fmt, offset, value, data=None):
+        """Common attribute get/set logic.
+
+        Keyword arguments:
+        fmt (string) -- a struct format string
+        offset (int) -- the byte offset (inclusive)
+        value (mixed) -- the value to inject at the specific offset
+        data (string) -- optional data to use instead of history
+        """
         
         if value is not None:
-            self._set(fmt, offset, value)
+            self._set(fmt, offset, value, data)
             
             return getattr(self, attr)
         
-        return self._get(fmt, offset)
+        return self._get(fmt, offset, data)
+    
+    def _getiv(self, mask, shift):
+        "Returns an IV depending on the mask and shift."
+
+        return (self._get('L', 0x38) & mask) >> shift
+    
+    def _setiv(self, mask, shift, value):
+        "Sets an IV depending on the mask and shift."
+
+        new_word = (self._get('L', 0x38) & ~mask) | (value << shift)
+
+        return self._set('L', 0x38, new_word)
+    
+    def _getsetiv(self, attr, mask, shift, value):
+        "Common logic for getting and setting an IV."
+
+        if value is not None:
+            self._setiv(mask=mask, shift=shift, value=value)
+
+            return getattr(self, attr)
+        
+        return self._getiv(mask=mask, shift=shift)
     
     def _checksumdata(self, data=None):
         "Returns the appropriate slice for calculating the checksum."
@@ -194,10 +223,9 @@ class PkmAttr(PkmCore):
         "Attempt to map any calls to missing attributes to functions."
         
         try:
-            self.__dict__[name] = value
+            getattr(self, 'attr__' + name)(value)
         except AttributeError:
-            new_data = getattr(self, 'attr__' + name)(self, value)
-            self._adddata(new_data)
+            self.__dict__[name] = value
     
     def attr__pv(self, value=None):
         """Personality value.
@@ -211,7 +239,7 @@ class PkmAttr(PkmCore):
         """Checksum.
         
         This should only be edited when the byte data is changed. Use the
-        appropriate bitutils function to calculate.
+        appropriate pypkm.util function to calculate.
         """
         
         return self._getset('checksum', fmt='H', offset=0x06, value=value)
@@ -267,15 +295,15 @@ class PkmAttr(PkmCore):
         "Language ID."
         
         # Currently not used in favor of returning the raw value
-        languages = {
-            0x01: 'jp',
-            0x02: 'en',
-            0x03: 'fr',
-            0x04: 'it',
-            0x05: 'de',
-            0x07: 'es',
-            0x08: 'kr',
-        }
+        #languages = {
+        #    0x01: 'jp',
+        #    0x02: 'en',
+        #    0x03: 'fr',
+        #    0x04: 'it',
+        #    0x05: 'de',
+        #    0x07: 'es',
+        #    0x08: 'kr',
+        #}
         
         return self._getset('language', fmt='B', offset=0x17, value=value)
     
@@ -371,9 +399,35 @@ class PkmAttr(PkmCore):
         "Move PP-Ups."
         pass
     
-    def attr__ivs(self, value=None):
-        "Individual values."
-        pass
+    def attr__hp_iv(self, value=None):
+        "Hit point individual value."
+
+        return self._getsetiv('hp_iv', mask=0x0000001f, shift=0, value=value)
+    
+    def attr__atk_iv(self, value=None):
+        "Attack individual value."
+        
+        return self._getsetiv('atk_iv', mask=0x000003e0, shift=5, value=value)
+    
+    def attr__def_iv(self, value=None):
+        "Defense individual value."
+        
+        return self._getsetiv('def_iv', mask=0x00007c00, shift=10, value=value)
+    
+    def attr__spe_iv(self, value=None):
+        "Speed individual value."
+        
+        return self._getsetiv('spe_iv', mask=0x000f8000, shift=15, value=value)
+    
+    def attr__spa_iv(self, value=None):
+        "Special attack individual value."
+        
+        return self._getsetiv('spa_iv', mask=0x01f00000, shift=20, value=value)
+    
+    def attr__spd_iv(self, value=None):
+        "Special defense individual value."
+        
+        return self._getsetiv('spd_iv', mask=0x3e000000, shift=25, value=value)
     
     def attr__fateful_encounter(self, value=None):
         "Fateful encounter flag."
@@ -468,9 +522,6 @@ class Pkm(PkmAttr):
     of the developer manipulating raw bytes and dealing with endianness. I'd
     like to organize it similar to an ORM.
     """
-    
-    def __init__(self):
-        pass
     
     def new(self, generation, path=None):
         """Create a blank PKM file to be filled with custom data.
