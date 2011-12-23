@@ -566,8 +566,26 @@ class PkmAttr(PkmCore):
         pass
     
     def attr__pokerus(self, value=None):
+        """Pokérus.
+
+        @see http://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9rus
+        """
+
+        return self._getset('pokerus', fmt='B', offset=0x82, value=value)
+    
+    def attr__has_pokerus(self, value=None):
         "Pokérus flag."
-        pass
+        
+        rus_byte = self.pokerus
+
+        return rus_byte % 16 != 0
+    
+    def attr__had_pokerus(self, value=None):
+        "Check if a Pokémon has had Pokérus."
+        
+        rus_byte = self.pokerus
+
+        return ((rus_byte % 16 == 0) and (rus_byte != 0))
     
     def attr__ball(self, value=None):
         "Poké Ball ID."
