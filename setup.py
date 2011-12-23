@@ -11,5 +11,5 @@ setup(name='pypkm',
       keywords='pkm pokemon',
       url='http://bitbucket.org/ceol/pypkm',
       packages=['pypkm'],
-      package_data={'pypkm': ['db/*.db']},
+      package_data={'pypkm': ['*.sqlite']},
      )
