@@ -7,8 +7,6 @@ __Add function logic to the following attributes:__
 * level
 * nickname
 * ot_name
-* is_egg
-* is_nicknamed
 
 * move_pp
 * move_ppup
