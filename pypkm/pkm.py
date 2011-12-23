@@ -429,6 +429,20 @@ class PkmAttr(PkmCore):
         
         return self._getsetiv('spd_iv', mask=0x3e000000, shift=25, value=value)
     
+    def attr__is_egg(self, value=None):
+        "Is egg flag."
+        
+        egg_byte = self._get('L', 0x38)
+        
+        return getbit(egg_byte, 30) == 1
+    
+    def attr__is_nicknamed(self, value=None):
+        "Is nicknamed flag."
+        
+        nick_byte = self._get('L', 0x38)
+        
+        return getbit(nick_byte, 31) == 1
+
     def attr__fateful_encounter(self, value=None):
         "Fateful encounter flag."
         pass
