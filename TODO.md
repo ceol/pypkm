@@ -1,23 +1,27 @@
 # PyPKM TODO List
 
-## Add function logic to the following attributes:
+__Add function logic to the following attributes:__
+
+* ot_gender
+* pokerus
+* level
+* nickname
+* ot_name
+* is_egg
+* is_nicknamed
+
+* move_pp
+* move_ppup
+* egg_location
+* met_location
+* egg_date
+* met_date
+* met_level
+* fateful_encounter
 
 * markings
 * ribbons
-* move_pp
-* move_ppup
-* fateful_encounter
 * shiny_leaves
 * leaf_crown
-* egg_location
-* met_location
-* nickname
-* ot_name
-* egg_date
-* met_date
-* pokerus
-* met_level
-* ot_gender
-* level
 
-## Add value checks to attribute functions.
+__Add value checks to attribute functions.__
