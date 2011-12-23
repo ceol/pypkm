@@ -432,9 +432,9 @@ class PkmAttr(PkmCore):
     def attr__is_egg(self, value=None):
         "Is egg flag."
         
-        if value is not None:
-            egg_byte = self._get('L', 0x38)
+        egg_byte = self._get('L', 0x38)
 
+        if value is not None:
             if value == True:
                 new_byte = setbit(egg_byte, 30)
             elif value == False:
@@ -445,17 +445,15 @@ class PkmAttr(PkmCore):
             self._set('L', 0x38, new_byte)
 
             return self.is_egg
-
-        egg_byte = self._get('L', 0x38)
         
         return getbit(egg_byte, 30) == 1
     
     def attr__is_nicknamed(self, value=None):
         "Is nicknamed flag."
 
-        if value is not None:
-            nick_byte = self._get('L', 0x38)
+        nick_byte = self._get('L', 0x38)
 
+        if value is not None:
             if value == True:
                 new_byte = setbit(nick_byte, 31)
             elif value == False:
@@ -466,14 +464,27 @@ class PkmAttr(PkmCore):
             self._set('L', 0x38, new_byte)
 
             return self.is_nicknamed
-        
-        nick_byte = self._get('L', 0x38)
-        
+                
         return getbit(nick_byte, 31) == 1
 
-    def attr__fateful_encounter(self, value=None):
+    def attr__is_fateful(self, value=None):
         "Fateful encounter flag."
-        pass
+        
+        fate_byte = self._get('B', 0x40)
+
+        if value is not None:
+            if value == True:
+                new_byte = setbit(fate_byte, 0)
+            elif value == False:
+                new_byte = clearbit(fate_byte, 0)
+            else:
+                raise AttributeError('invalid is_fateful value')
+            
+            self._set('B', 0x40, new_byte)
+
+            return self.is_fateful
+        
+        return getbit(fate_byte, 0) == 1
     
     def attr__gender(self, value=None):
         "Pokémon gender."
@@ -484,10 +495,12 @@ class PkmAttr(PkmCore):
             0b10: 'n', # genderless
         }
 
+        gender_byte = self._get('B', 0x40)
+        gender_id = (gender_byte & 0x6) >> 1
+
         if value is not None:
             # @see http://www.daniweb.com/software-development/python/code/217019
             #gender_bits = [key for key, val in genders.iteritems() if val == value][0]
-            gender_byte = self._get('B', 0x40)
 
             if value == 'm':
                 new_byte = setbit(gender_byte, 1)
@@ -505,9 +518,6 @@ class PkmAttr(PkmCore):
             
             return self.gender
         
-        gender_byte = self._get('B', 0x40)
-        gender_id = (gender_byte & 0x6) >> 1
-
         return genders[gender_id]
     
     def attr__shiny_leaves(self, value=None):
@@ -524,6 +534,14 @@ class PkmAttr(PkmCore):
     
     def attr__met_location(self, value=None):
         "Location where the Pokémon was met."
+        pass
+    
+    def attr__pt_egg_location(self, value=None):
+        "Location where the egg was received. (Platinum-only)"
+        pass
+    
+    def attr__pt_met_location(self, value=None):
+        "Location where the Pokémon was met. (Platinum-only)"
         pass
     
     def attr__nickname(self, value=None):
