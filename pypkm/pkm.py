@@ -432,12 +432,40 @@ class PkmAttr(PkmCore):
     def attr__is_egg(self, value=None):
         "Is egg flag."
         
+        if value is not None:
+            egg_byte = self._get('L', 0x38)
+
+            if value == True:
+                new_byte = setbit(egg_byte, 30)
+            elif value == False:
+                new_byte = clearbit(egg_byte, 30)
+            else:
+                raise AttributeError('invalid is_egg value')
+            
+            self._set('L', 0x38, new_byte)
+
+            return self.is_egg
+
         egg_byte = self._get('L', 0x38)
         
         return getbit(egg_byte, 30) == 1
     
     def attr__is_nicknamed(self, value=None):
         "Is nicknamed flag."
+
+        if value is not None:
+            nick_byte = self._get('L', 0x38)
+
+            if value == True:
+                new_byte = setbit(nick_byte, 31)
+            elif value == False:
+                new_byte = clearbit(nick_byte, 31)
+            else:
+                raise AttributeError('invalid is_nicknamed value')
+            
+            self._set('L', 0x38, new_byte)
+
+            return self.is_nicknamed
         
         nick_byte = self._get('L', 0x38)
         
