@@ -28,7 +28,7 @@ place in your Python path.
 
 First, import the `Pkm` class from the `pypkm` package:
 
-    from pypkm.pkm import Pkm
+    from pypkm import Pkm
 
 Then, create or load a PKM file (making sure to specify the file's game
 generation):
