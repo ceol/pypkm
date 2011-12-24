@@ -282,14 +282,17 @@ class PkmAttr(PkmCore):
     def attr__markings(self, value=None):
         "Pokédex markings. (I think?)"
         
-        markings = {
-            0x01: 'circle',
-            0x02: 'triangle',
-            0x04: 'square',
-            0x08: 'heart',
-            0x10: 'star',
-            0x20: 'diamond',
-        }
+        # Currently not used in favor of returning the raw value
+        #markings = {
+        #    0x01: 'circle',
+        #    0x02: 'triangle',
+        #    0x04: 'square',
+        #    0x08: 'heart',
+        #    0x10: 'star',
+        #    0x20: 'diamond',
+        #}
+
+        return self._getset('markings', fmt='B', offset=0x16, value=value)
     
     def attr__language(self, value=None):
         "Language ID."
