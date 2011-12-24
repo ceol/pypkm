@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import os
 import struct
 
 class BinaryFile(object):
@@ -134,6 +135,66 @@ class BinaryFile(object):
             return self.set(fmt, offset, value, data)
         
         return self.get(fmt, offset, data)
+    
+    def new(self):
+        "Create a new file from scratch."
+
+        self.add_data('')
+        
+        return self
+    
+    def load_from_data(self, data):
+        """Load a file from binary data.
+
+        Keyword arguments:
+        data (string) -- the file's binary data
+        """
+
+        self.add_data(data)
+
+        return self
+    
+    def load_from_path(self, path):
+        """Load a file from the filesystem.
+
+        Keyword arguments:
+        path (string) -- path (local or absolute) to the file
+        """
+
+        data = open(path).read()
+        self.add_data(data)
+        self.file_load_path = path
+
+        return self
+    
+    def save(self, path=None, data=None):
+        """Save the most recent changes.
+        
+        Keyword arguments:
+        path (string) -- the path to the file to save
+        data (string) -- optional data to save
+        
+        This will save changes to either a separate file in the
+        file_load_path directory or to a user-supplied path. Make sure, if
+        you're supplying a path, to give a path to the file and not just the
+        directory.
+        """
+
+        if path is None:
+            if self.file_save_path == '':
+                path = self.file_load_path
+            else:
+                filename, fileext = os.path.splitext(self.file_load_path)
+                path = filename + '_new' + fileext
+        
+        if data is not None:
+            data = self.get_data()
+        
+        with open(path, 'w') as f:
+            f.write(data)
+        
+        return self
+
 
 class PkmBinaryFile(BinaryFile):
     "Extension of the BinaryFile class for PKM files."
