@@ -167,6 +167,21 @@ class BinaryFile(object):
 
         return self
     
+    def load(self, path=None, data=None):
+        """Shorthand for loading a file.
+
+        Keyword arguments:
+        path (string) -- optional path, supplied if no data
+        data (string) -- optional data, supplied if no path
+        """
+
+        if path is not None:
+            self.load_from_path(path)
+        elif data is not None:
+            self.load_from_data(data)
+        
+        return self
+    
     def save(self, path=None, data=None):
         """Save the most recent changes.
         
@@ -274,3 +289,17 @@ class PkmBinaryFile(BinaryFile):
             data = self.get_data()
         
         return data[0x08:0x88]
+    
+    def load(self, gen, path=None, data=None):
+        """Load the PKM file either by path or by data.
+
+        Keyword arguments:
+        gen (int) -- the file's game generation (supports 4 or 5)
+        path (string) -- optional path, supplied if no data
+        data (string) -- optional data, supplied if no path
+        """
+
+        super(PkmBinaryFile, self).load(path=path, data=data)
+        self.set_gen(gen)
+
+        return self
