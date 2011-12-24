@@ -391,13 +391,45 @@ class PkmAttr(PkmCore):
         
         return self._getset('move4', fmt='H', offset=0x2E, value=value)
     
-    def attr__move_pp(self, value=None):
-        "Current move PP."
-        pass
+    def attr__move1_pp(self, value=None):
+        "Current move #1 PP."
+        
+        return self._getset('move1_pp', fmt='B', offset=0x30, value=value)
     
-    def attr__move_ppup(self, value=None):
-        "Move PP-Ups."
-        pass
+    def attr__move2_pp(self, value=None):
+        "Current move #2 PP."
+        
+        return self._getset('move2_pp', fmt='B', offset=0x31, value=value)
+    
+    def attr__move3_pp(self, value=None):
+        "Current move #3 PP."
+        
+        return self._getset('move3_pp', fmt='B', offset=0x32, value=value)
+    
+    def attr__move4_pp(self, value=None):
+        "Current move #4 PP."
+        
+        return self._getset('move4_pp', fmt='B', offset=0x33, value=value)
+    
+    def attr__move1_ppups(self, value=None):
+        "Move #1 PP-Ups."
+        
+        return self._getset('move1_ppups', fmt='B', offset=0x34, value=value)
+    
+    def attr__move2_ppups(self, value=None):
+        "Move #2 PP-Ups."
+        
+        return self._getset('move2_ppups', fmt='B', offset=0x35, value=value)
+    
+    def attr__move3_ppups(self, value=None):
+        "Move #3 PP-Ups."
+        
+        return self._getset('move3_ppups', fmt='B', offset=0x36, value=value)
+    
+    def attr__move4_ppups(self, value=None):
+        "Move #4 PP-Ups."
+        
+        return self._getset('move4_ppups', fmt='B', offset=0x37, value=value)
     
     def attr__hp_iv(self, value=None):
         "Hit point individual value."
