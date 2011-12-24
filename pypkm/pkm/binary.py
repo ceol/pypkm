@@ -4,7 +4,7 @@ import os
 import struct
 
 class BinaryFile(object):
-    """Create and edit binary data.
+    """Core binary editing functionality.
 
     This class is a wrapper for generic file manipulation including getting,
     setting, creating, and saving files. Knowledge of the file's structure
