@@ -10,6 +10,6 @@ setup(name='pypkm',
       author_email='ceolwulf@gmail.com',
       keywords='pkm pokemon',
       url='http://bitbucket.org/ceol/pypkm',
-      packages=['pypkm'],
+      packages=['pypkm', 'pypkm.pkm'],
       package_data={'pypkm': ['*.sqlite']},
      )
