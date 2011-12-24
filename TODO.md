@@ -6,9 +6,6 @@ __Add function logic to the following attributes:__
 * nickname
 * ot_name
 
-* egg_date
-* met_date
-
 * ribbons
 * shiny_leaves
 

@@ -613,6 +613,13 @@ class PkmAttr(PkmCore):
     
     def attr__egg_date(self, value=None):
         "Date when the egg was received."
+
+        if value is not None:
+            self._set('B', 0x78, (value[0]-2000)) # year - 2000
+            self._set('B', 0x79, value[1]) # month
+            self._set('B', 0x7A, value[2]) # day
+
+            return self.egg_date
         
         date_year = self._get('B', 0x78)
         date_month = self._get('B', 0x79)
@@ -622,6 +629,13 @@ class PkmAttr(PkmCore):
     
     def attr__met_date(self, value=None):
         "Date when the Pokémon was met."
+
+        if value is not None:
+            self._set('B', 0x7B, (value[0]-2000)) # year - 2000
+            self._set('B', 0x7C, value[1]) # month
+            self._set('B', 0x7D, value[2]) # day
+
+            return self.met_date
         
         date_year = self._get('B', 0x7B)
         date_month = self._get('B', 0x7C)
