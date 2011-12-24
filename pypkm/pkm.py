@@ -594,11 +594,41 @@ class PkmAttr(PkmCore):
     
     def attr__met_level(self, value=None):
         "Level at which the Pokémon was met."
-        pass
+        
+        metlv_byte = self._get('B', 0x84)
+
+        if value is not None:
+            new_byte = (metlv_byte & ~0x7f) | value
+            self._set('B', 0x84, new_byte)
+
+            return self.met_level
+        
+        return metlv_byte & 0x7f # first 7 bits
     
     def attr__ot_gender(self, value=None):
         "Original trainer gender."
-        pass
+        
+        genders = {
+            0: 'm', # male
+            1: 'f', # female
+        }
+        gender_byte = self._get('B', 0x84)
+
+        if value is not None:
+            if value == 'm':
+                new_byte = clearbit(gender_byte, 7)
+            elif value == 'f':
+                new_byte = setbit(gender_byte, 7)
+            else:
+                raise AttributeError('invalid ot_gender value')
+            
+            self._set('B', 0x84, new_byte)
+
+            return self.ot_gender
+        
+        gender_id = getbit(gender_byte, 7)
+
+        return genders[gender_id]
     
     def attr__encounter_type(self, value=None):
         "Pokémon encounter type."
