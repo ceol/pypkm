@@ -530,19 +530,23 @@ class PkmAttr(PkmCore):
     
     def attr__egg_location(self, value=None):
         "Location where the egg was received."
-        pass
+        
+        return self._getset('egg_location', fmt='H', offset=0x7E, value=value)
     
     def attr__met_location(self, value=None):
         "Location where the Pokémon was met."
-        pass
+        
+        return self._getset('met_location', fmt='H', offset=0x80, value=value)
     
     def attr__pt_egg_location(self, value=None):
         "Location where the egg was received. (Platinum-only)"
-        pass
+        
+        return self._getset('pt_egg_location', fmt='H', offset=0x44, value=value)
     
     def attr__pt_met_location(self, value=None):
         "Location where the Pokémon was met. (Platinum-only)"
-        pass
+        
+        return self._getset('pt_met_location', fmt='H', offset=0x44, value=value)
     
     def attr__nickname(self, value=None):
         "Pokémon nickname."
@@ -559,11 +563,21 @@ class PkmAttr(PkmCore):
     
     def attr__egg_date(self, value=None):
         "Date when the egg was received."
-        pass
+        
+        date_year = self._get('B', 0x78)
+        date_month = self._get('B', 0x79)
+        date_day = self._get('B', 0x7A)
+
+        return (date_year+2000, date_month, date_day)
     
     def attr__met_date(self, value=None):
         "Date when the Pokémon was met."
-        pass
+        
+        date_year = self._get('B', 0x7B)
+        date_month = self._get('B', 0x7C)
+        date_day = self._get('B', 0x7D)
+
+        return (date_year+2000, date_month, date_day)
     
     def attr__pokerus(self, value=None):
         """Pokérus.
@@ -574,7 +588,7 @@ class PkmAttr(PkmCore):
         return self._getset('pokerus', fmt='B', offset=0x82, value=value)
     
     def attr__has_pokerus(self, value=None):
-        "Pokérus flag."
+        "Check if a Pokémon is currently infected with Pokérus."
         
         rus_byte = self.pokerus
 
