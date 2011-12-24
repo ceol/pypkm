@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from pypkm.utils import getbit, setbit, clearbit
-from pypkm.pkm.binary import PkmBinaryFile
+from pypkm.binary import PkmBinaryFile
 
 class AttrMapper(object):
     "Core attribute mapping functionality."
