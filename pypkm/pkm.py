@@ -559,9 +559,24 @@ class PkmAttr(PkmCore):
         "Shiny leaves. (HG/SS-only)"
         pass
     
-    def attr__leaf_crown(self, value=None):
+    def attr__has_leafcrown(self, value=None):
         "Leaf Crown. (HG/SS-only)"
-        pass
+        
+        leaf_byte = self._get('B', 0x41)
+
+        if value is not None:
+            if value == True:
+                new_byte = setbit(leaf_byte, 5)
+            elif value == False:
+                new_byte = clearbit(leaf_byte, 5)
+            else:
+                raise AttributeError('invalid has_leafcrown value')
+            
+            self._set('B', 0x41, new_byte)
+
+            return self.has_leafcrown
+        
+        return getbit(leaf_byte, 5) == 1
     
     def attr__egg_location(self, value=None):
         "Location where the egg was received."
