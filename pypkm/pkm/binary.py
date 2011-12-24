@@ -290,6 +290,18 @@ class PkmBinaryFile(BinaryFile):
         
         return data[0x08:0x88]
     
+    def new(self, gen):
+        """Create the PKM from scratch.
+
+        Keyword arguments:
+        gen (int) -- the file's game generation (supports 4 or 5)
+        """
+
+        super(PkmBinaryFile, self).new()
+        self.set_gen(gen)
+
+        return self
+    
     def load(self, gen, path=None, data=None):
         """Load the PKM file either by path or by data.
 
