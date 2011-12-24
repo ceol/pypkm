@@ -34,7 +34,11 @@ IRC channel.
 
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
-from pypkm.base import PkmBase
+from pypkm.attr import PkmAttrMapper
+
+class PkmBase(PkmAttrMapper):
+    "Base class for the Pkm class."
+    pass
 
 class Pkm(PkmBase):
     "Wrapper class for all PKM file manipulation."
