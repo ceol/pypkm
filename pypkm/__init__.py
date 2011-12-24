@@ -43,3 +43,13 @@ class PkmBase(PkmAttrMapper):
 class Pkm(PkmBase):
     "Wrapper class for all PKM file manipulation."
     pass
+
+def new(gen):
+    "Create a PKM file from scratch and return a Pkm instance."
+    
+    return Pkm().new(gen=gen)
+
+def load(gen, path=None, data=None):
+    "Load a PKM file and return a Pkm instance."
+    
+    return Pkm().load(gen=gen, path=path, data=data)
