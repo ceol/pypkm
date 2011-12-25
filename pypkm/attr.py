@@ -1,7 +1,18 @@
 # coding=utf-8
 
+import sqlite3
+
 from pypkm.utils import getbit, setbit, clearbit
 from pypkm.binary import PkmBinaryFile
+
+def _get_cursor():
+    # grab this file's abspath
+    import os, inspect
+    this_file = inspect.getfile(inspect.currentframe())
+    this_dir = os.path.dirname(os.path.abspath(this_file))
+
+    conn = sqlite3.connect(os.path.join(this_dir, 'pypkm.sqlite'))
+    return conn.cursor()
 
 class AttrMapper(object):
     "Core attribute mapping functionality."
@@ -398,12 +409,26 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         
         nickname = ''
         offset = 0x48
+
+        if self.get_gen() == 4:
+            c = _get_cursor()
+
         while True:
             letter = self.get('H', offset)
             if letter == 0xFFFF or offset > 0x5B:
                 break
-            nickname += unichr(letter)
+            
+            if self.get_gen() == 5:
+                nickname += unichr(letter)
+            elif self.get_gen() == 4:
+                query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
+                lett = c.execute(query, (letter,)).fetchone()[0]
+                nickname += lett
+            
             offset += 2
+
+        if self.get_gen() == 4:
+            c.close()
         
         return nickname
     
