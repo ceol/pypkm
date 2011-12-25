@@ -14,7 +14,7 @@ Example usage:
     >>> pkm.exp = 10000
     >>> pkm.save()
     gengar_new.pkm
-    >>> pkm.level = 50
+    >>> pkm.exp = 5000
     >>> pkm.save('gengar_50.pkm')
     gengar_50.pkm
 
