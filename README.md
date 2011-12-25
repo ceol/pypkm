@@ -28,20 +28,20 @@ place in your Python path.
 
 First, import the `Pkm` class from the `pypkm` package:
 
-    from pypkm import Pkm
+    import pypkm
 
 Then, create or load a PKM file (making sure to specify the file's game
 generation):
 
     # Create from scratch
-    my_pkm = Pkm().new(gen=4)
+    my_pkm = pypkm.new(gen=4)
 
     # Load from a file
-    my_pkm = Pkm().load(gen=4, path='MyPokemon.pkm')
+    my_pkm = pypkm.load(gen=4, path='MyPokemon.pkm')
     
     # Load from data
     pkm_data = open('/path/to/MyPokemon.pkm', 'r').read()
-    my_pkm = Pkm().load(gen=4, data=pkm_data)
+    my_pkm = pypkm.load(gen=4, data=pkm_data)
 
 From here, you can edit your Pokémon's data by calling attributes of the
 `my_pkm` instance. For example, to give your Pokémon the Leftovers item to

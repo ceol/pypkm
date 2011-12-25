@@ -7,8 +7,8 @@ convert PKM files. Its goal is to faciliate the creation of more end-user
 tools and allow developers to work with PKM files.
 
 Example usage:
-    >>> from pypkm import Pkm
-    >>> pkm = Pkm().load(gen=4, path='gengar.pkm')
+    >>> import pypkm
+    >>> pkm = pypkm.load(gen=4, path='gengar.pkm')
     >>> pkm.move1
     95
     >>> pkm.level = 100
