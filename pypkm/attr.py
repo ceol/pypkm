@@ -395,7 +395,17 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     
     def attr__nickname(self, value=None):
         "Pokémon nickname."
-        pass
+        
+        nickname = ''
+        offset = 0x48
+        while True:
+            letter = self.get('H', offset)
+            if letter == 0xFFFF or offset > 0x5B:
+                break
+            nickname += unichr(letter)
+            offset += 2
+        
+        return nickname
     
     def attr__hometown(self, value=None):
         "Pokémon hometown."
