@@ -22,7 +22,7 @@ Then, you can either `cd` into the newly-created `pypkm` directory and run
 open the `pypkm` directory and manually copy the `pypkm` subdirectory to a
 place in your Python path.
 
-[4]: https://bitbucket.org/ceol/pypkm
+[4]: https://github.com/ceol/pypkm
 
 ## Usage
 
