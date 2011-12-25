@@ -514,7 +514,3 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         "Dream World ability flag. (B/W-only)"
         
         return self.getset(fmt='B', offset=0x42, value=value)
-    
-    def attr__level(self, value=None):
-        "Level."
-        pass

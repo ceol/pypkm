@@ -11,7 +11,7 @@ Example usage:
     >>> pkm = pypkm.load(gen=4, path='gengar.pkm')
     >>> pkm.move1
     95
-    >>> pkm.level = 100
+    >>> pkm.exp = 10000
     >>> pkm.save()
     gengar_new.pkm
     >>> pkm.level = 50
