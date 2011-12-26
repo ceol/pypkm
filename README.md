@@ -97,4 +97,4 @@ Pokémon data, and it's been a huge help (the `shuffle()` function comes
 directly from his work).
 
 [6]: http://projectpokemon.org/
-[7]: tsanth@iname.com
+[7]: mailto:tsanth@iname.com
