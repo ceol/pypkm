@@ -163,7 +163,6 @@ class BinaryFile(object):
 
         data = open(path).read()
         self.add_data(data)
-        import os
         self.file_load_path = os.path.abspath(path)
 
         return self
