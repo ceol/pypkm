@@ -64,7 +64,7 @@ You might even want to change your Pokémon's species all together:
 
 As you can tell, you need to know the correct [index number][5] for most
 editing. A proper API reference will be made available in time. Until then,
-refer to the appropriate function's documentation in the `pkm` module.
+refer to the appropriate function's documentation in the `pypkm.attr` module.
 
 If you've edited the data, you probably want to save. If you've created the
 Pokémon from scratch or loaded directly from data and did not specify a path

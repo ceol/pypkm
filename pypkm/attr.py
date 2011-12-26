@@ -5,14 +5,13 @@ import sqlite3
 from pypkm.utils import getbit, setbit, clearbit
 from pypkm.binary import PkmBinaryFile
 
-def _get_cursor():
-    # grab this file's abspath
-    import os, inspect
-    this_file = inspect.getfile(inspect.currentframe())
-    this_dir = os.path.dirname(os.path.abspath(this_file))
-
-    conn = sqlite3.connect(os.path.join(this_dir, 'pypkm.sqlite'))
+def _get_cursor(path):
+    conn = sqlite3.connect(path)
     return conn.cursor()
+
+def _get_letter(c, letter):
+    query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
+    return c.execute(query, (letter,)).fetchone()[0]
 
 class AttrMapper(object):
     "Core attribute mapping functionality."
@@ -411,7 +410,9 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         offset = 0x48
 
         if self.get_gen() == 4:
-            c = _get_cursor()
+            import os
+            this_dir = os.path.dirname(os.path.abspath(__file__))
+            c = _get_cursor(path=os.path.join(this_dir, 'pypkm.sqlite'))
 
         while True:
             letter = self.get('H', offset)
@@ -421,9 +422,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             if self.get_gen() == 5:
                 nickname += unichr(letter)
             elif self.get_gen() == 4:
-                query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
-                lett = c.execute(query, (letter,)).fetchone()[0]
-                nickname += lett
+                nickname += _get_letter(c, letter)
             
             offset += 2
 
