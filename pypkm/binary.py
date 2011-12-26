@@ -196,13 +196,16 @@ class BinaryFile(object):
         """
 
         if path is None:
-            if self.file_save_path == '':
-                path = self.file_load_path
-            else:
+            if self.file_save_path != '':
+                path = self.file_save_path
+            elif self.file_load_path != '':
                 filename, fileext = os.path.splitext(self.file_load_path)
                 path = filename + '_new' + fileext
+            else:
+                raise AttributeError('missing path attribute')
+                
         
-        if data is not None:
+        if data is None:
             data = self.get_data()
         
         with open(path, 'w') as f:
