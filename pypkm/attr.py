@@ -410,61 +410,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     def attr__nickname(self, value=None):
         "Pokémon nickname."
         
-        nickname = ''
-        offset = 0x48
-
-        if self.get_gen() == 4:
-            import os
-            this_dir = os.path.dirname(os.path.abspath(__file__))
-            c = _get_cursor(path=os.path.join(this_dir, 'pypkm.sqlite'))
-        
-        if value is not None:
-            # loop over the nickname bytes, injecting the nickname then
-            # overwriting the remaining bytes
-            count = 1
-            while offset < 0x5E:
-                if count <= len(value):
-                    letter = value[count-1]
-                    if self.get_gen() == 5:
-                        word = ord(letter.decode('utf8'))
-                    elif self.get_gen() == 4:
-                        word = _get_ord(c, letter)
-                else:
-                    if self.get_gen() == 5:
-                        # in gen 5, the bytes immediately after the last
-                        # letter are 0xFF, then everything after that is
-                        # 0x00, followed by two 0xFF at 0x5C
-                        if (count == len(value) + 1) or (offset == 0x5C):
-                            word = 0xFFFF
-                        else:
-                            word = 0x0000
-                    elif self.get_gen() == 4:
-                        # in gen 4, everything after the last letter up to
-                        # 0x5D is 0xFF
-                        word = 0xFFFF
-
-                self.set('H', offset, word)
-                count += 1
-                offset += 2
-            
-            return
-
-        while True:
-            ord_ = self.get('H', offset)
-            if ord_ == 0xFFFF or offset > 0x5B:
-                break
-            
-            if self.get_gen() == 5:
-                nickname += unichr(ord_)
-            elif self.get_gen() == 4:
-                nickname += _get_letter(c, ord_)
-            
-            offset += 2
-
-        if self.get_gen() == 4:
-            c.close()
-        
-        return nickname
+        return self.getset_string(offset=0x48, length=10, value=value)
     
     def attr__hometown(self, value=None):
         "Pokémon hometown."
@@ -473,7 +419,8 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     
     def attr__ot_name(self, value=None):
         "Original trainer name."
-        pass
+
+        return self.getset_string(offset=0x68, length=7, value=value)
     
     def attr__egg_date(self, value=None):
         "Date when the egg was received."

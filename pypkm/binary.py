@@ -2,6 +2,7 @@
 
 import os
 import struct
+import sqlite3
 
 class BinaryFile(object):
     """Core binary editing functionality.
@@ -136,10 +137,10 @@ class BinaryFile(object):
         
         return self.get(fmt, offset, data)
     
-    def new(self):
+    def new(self, data=''):
         "Create a new file from scratch."
 
-        self.add_data('')
+        self.add_data(data)
         
         return self
     
@@ -217,6 +218,12 @@ class BinaryFile(object):
 class PkmBinaryFile(BinaryFile):
     "Extension of the BinaryFile class for PKM files."
 
+    # SQLite database
+    db_name = 'pypkm.sqlite'
+
+    # SQLite cursor
+    db = None
+
     def __init__(self):
         super(PkmBinaryFile, self).__init__()
 
@@ -235,6 +242,14 @@ class PkmBinaryFile(BinaryFile):
         """
 
         return self.set_file_subtype(subtype=gen)
+    
+    def is_gen(self, gen):
+        """Check if the file's generation matches the one provided.
+
+        gen (int) -- the game generation to check against
+        """
+
+        return self.get_gen() == gen
     
     def get_iv(self, mask, shift, data=None):
         """Returns an IV specified by the mask and shift.
@@ -281,6 +296,110 @@ class PkmBinaryFile(BinaryFile):
         
         return self.get_iv(mask=mask, shift=shift)
     
+    def get_string(self, offset, length):
+        """Retrieve a string from a PKM file.
+
+        Keyword arguments:
+        offset (int) -- the byte offset (inclusive)
+        length (int) -- the length of the string (not including the
+            terminator byte)
+        """
+
+        if self.is_gen(4):
+            if self.db is None:
+                this_dir = os.path.dirname(os.path.abspath(__file__))
+                conn = sqlite3.connect(os.path.join(this_dir, self.db_name))
+                self.db = conn.cursor()
+
+        string = ''
+        term_byte = offset + (offset * 2)
+
+        while True:
+            ord_ = self.get('H', offset)
+            
+            # stop the loop at the terminator, wherever it may be
+            if offset >= term_byte or ord_ == 0xFFFF:
+                break
+            
+            if self.is_gen(5):
+                string += unichr(ord_)
+            elif self.is_gen(4):
+                query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
+                string += self.db.execute(query, (ord_,)).fetchone()[0]
+
+            offset += 2
+        
+        if self.db is not None:
+            self.db.close()
+            self.db = None
+        
+        return string
+    
+    def set_string(self, offset, length, value):
+        """Set a string in a PKM file.
+
+        Keyword arguments:
+        offset (int) -- the byte offset (inclusive)
+        length (int) -- the length of the string (not including the
+            terminator byte)
+        value (string) -- the letters to insert
+        """
+
+        if self.is_gen(4):
+            if self.db is None:
+                this_dir = os.path.dirname(os.path.abspath(__file__))
+                conn = sqlite3.connect(os.path.join(this_dir, self.db_name))
+                self.db = conn.cursor()
+        
+        count = 1
+        term_byte = offset + (offset * 2)
+
+        # loop over the nickname bytes, injecting the nickname then
+        # overwriting the remaining bytes
+        while offset <= term_byte:
+            if count <= len(value):
+                letter = value[count-1]
+                if self.is_gen(5):
+                    word = ord(letter.decode('utf8'))
+                elif self.is_gen(4):
+                    query = 'SELECT `id` FROM `charmap` WHERE `character` = ?'
+                    word = self.db.execute(query, (letter,)).fetchone()[0]
+            else:
+                if self.is_gen(4):
+                    # in gen 5, the bytes immediately after the last
+                    # letter are 0xFF, then everything after that is
+                    # 0x00, followed by two 0xFF at 0x5C
+                    if (count == len(value) + 1) or (offset == 0x5C):
+                        word = 0xFFFF
+                    else:
+                        word = 0x0000
+                elif self.is_gen(4):
+                    # in gen 4, everything after the last letter up to
+                    # 0x5D is 0xFF
+                    word = 0xFFFF
+            
+            self.set('H', offset, word)
+            count += 1
+            offset += 2
+        
+        if self.is_gen(4):
+            self.db.close()
+            self.db = None
+        
+        return
+    
+    def getset_string(self, offset, length, value):
+        """Common logic for getting and setting a string.
+
+        Keyword arguments:
+        value (string) -- the string to set
+        """
+
+        if value is not None:
+            return self.set_string(offset, length, value)
+        
+        return self.get_string(offset, length)
+    
     def checksum_data(self, data=None):
         """Returns the appropriate slice for calculating the file checksum.
 
@@ -300,7 +419,7 @@ class PkmBinaryFile(BinaryFile):
         gen (int) -- the file's game generation (supports 4 or 5)
         """
 
-        super(PkmBinaryFile, self).new()
+        super(PkmBinaryFile, self).new(data='\x00'*136)
         self.set_gen(gen)
 
         return self
