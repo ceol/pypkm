@@ -292,7 +292,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             else:
                 raise AttributeError('invalid is_egg value')
             
-            self.set('L', 0x38, new_byte)
+            return self.set('L', 0x38, new_byte)
         
         return getbit(egg_byte, 30) == 1
     
@@ -309,7 +309,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             else:
                 raise AttributeError('invalid is_nicknamed value')
             
-            self.set('L', 0x38, new_byte)
+            return self.set('L', 0x38, new_byte)
                 
         return getbit(nick_byte, 31) == 1
 
@@ -326,7 +326,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             else:
                 raise AttributeError('invalid is_fateful value')
             
-            self.set('B', 0x40, new_byte)
+            return self.set('B', 0x40, new_byte)
         
         return getbit(fate_byte, 0) == 1
     
@@ -358,7 +358,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             else:
                 raise ValueError('invalid gender value')
 
-            self.set('B', 0x40, new_byte)
+            return self.set('B', 0x40, new_byte)
         
         return genders[gender_id]
     
@@ -379,7 +379,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             else:
                 raise AttributeError('invalid has_leafcrown value')
             
-            self.set('B', 0x41, new_byte)
+            return self.set('B', 0x41, new_byte)
         
         return getbit(leaf_byte, 5) == 1
     
@@ -447,12 +447,16 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             self.set('B', 0x78, (value[0]-2000)) # year - 2000
             self.set('B', 0x79, value[1]) # month
             self.set('B', 0x7A, value[2]) # day
+
+            return
         
         date_year = self.get('B', 0x78)
+        if date_year > 0:
+            date_year += 2000
         date_month = self.get('B', 0x79)
         date_day = self.get('B', 0x7A)
 
-        return (date_year+2000, date_month, date_day)
+        return (date_year, date_month, date_day)
     
     def attr__met_date(self, value=None):
         "Date when the Pokémon was met."
@@ -461,12 +465,16 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             self.set('B', 0x7B, (value[0]-2000)) # year - 2000
             self.set('B', 0x7C, value[1]) # month
             self.set('B', 0x7D, value[2]) # day
+
+            return
         
         date_year = self.get('B', 0x7B)
+        if date_year > 0:
+            date_year += 2000
         date_month = self.get('B', 0x7C)
         date_day = self.get('B', 0x7D)
 
-        return (date_year+2000, date_month, date_day)
+        return (date_year, date_month, date_day)
     
     def attr__pokerus(self, value=None):
         """Pokérus.
