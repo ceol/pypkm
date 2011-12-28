@@ -51,7 +51,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         
         Note: Do NOT edit this unless you know what you are doing!
         """
-        
+
         return self.getset(fmt='L', offset=0x00, value=value)
             
     def attr__checksum(self, value=None):
@@ -95,37 +95,39 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     
     def attr__ability(self, value=None):
         "Ability ID."
+
+        if value < 0 or value > 164:
+            raise ValueError('ability ID not in range')
         
         return self.getset(fmt='B', offset=0x15, value=value)
     
     def attr__markings(self, value=None):
-        "Pokédex markings. (I think?)"
+        "PC box markings."
         
-        # Currently not used in favor of returning the raw value
-        #markings = {
-        #    0x01: 'circle',
-        #    0x02: 'triangle',
-        #    0x04: 'square',
-        #    0x08: 'heart',
-        #    0x10: 'star',
-        #    0x20: 'diamond',
-        #}
-
-        return self.getset(fmt='B', offset=0x16, value=value)
+        markings = {
+            0x01: 'circle',
+            0x02: 'triangle',
+            0x04: 'square',
+            0x08: 'heart',
+            0x10: 'star',
+            0x20: 'diamond',
+        }
     
     def attr__language(self, value=None):
         "Language ID."
         
-        # Currently not used in favor of returning the raw value
-        #languages = {
-        #    0x01: 'jp',
-        #    0x02: 'en',
-        #    0x03: 'fr',
-        #    0x04: 'it',
-        #    0x05: 'de',
-        #    0x07: 'es',
-        #    0x08: 'kr',
-        #}
+        languages = {
+            0x01: 'jp',
+            0x02: 'en',
+            0x03: 'fr',
+            0x04: 'it',
+            0x05: 'de',
+            0x07: 'es',
+            0x08: 'kr',
+        }
+
+        if languages.get(value) is None:
+            raise ValueError('invalid language value')
         
         return self.getset(fmt='B', offset=0x17, value=value)
     
@@ -256,30 +258,54 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     def attr__hp_iv(self, value=None):
         "Hit point individual value."
 
+        if value is not None:
+            if value not in range(32):
+                raise ValueError('HP IV value not in range')
+
         return self.getset_iv(mask=0x0000001f, shift=0, value=value)
     
     def attr__atk_iv(self, value=None):
         "Attack individual value."
+
+        if value is not None:
+            if value not in range(32):
+                raise ValueError('Attack IV value not in range')
         
         return self.getset_iv(mask=0x000003e0, shift=5, value=value)
     
     def attr__def_iv(self, value=None):
         "Defense individual value."
+
+        if value is not None:
+            if value not in range(32):
+                raise ValueError('Defense IV value not in range')
         
         return self.getset_iv(mask=0x00007c00, shift=10, value=value)
     
     def attr__spe_iv(self, value=None):
         "Speed individual value."
+
+        if value is not None:
+            if value not in range(32):
+                raise ValueError('Speed IV value not in range')
         
         return self.getset_iv(mask=0x000f8000, shift=15, value=value)
     
     def attr__spa_iv(self, value=None):
         "Special attack individual value."
+
+        if value is not None:
+            if value not in range(32):
+                raise ValueError('Special Attack IV value not in range')
         
         return self.getset_iv(mask=0x01f00000, shift=20, value=value)
     
     def attr__spd_iv(self, value=None):
         "Special defense individual value."
+
+        if value is not None:
+            if value not in range(32):
+                raise ValueError('Special Defense IV value not in range')
         
         return self.getset_iv(mask=0x3e000000, shift=25, value=value)
     
@@ -294,7 +320,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == False:
                 new_byte = clearbit(egg_byte, 30)
             else:
-                raise AttributeError('invalid is_egg value')
+                raise ValueError('invalid is_egg value')
             
             return self.set('L', 0x38, new_byte)
         
@@ -311,7 +337,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == False:
                 new_byte = clearbit(nick_byte, 31)
             else:
-                raise AttributeError('invalid is_nicknamed value')
+                raise ValueError('invalid is_nicknamed value')
             
             return self.set('L', 0x38, new_byte)
                 
@@ -328,7 +354,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == False:
                 new_byte = clearbit(fate_byte, 0)
             else:
-                raise AttributeError('invalid is_fateful value')
+                raise ValueError('invalid is_fateful value')
             
             return self.set('B', 0x40, new_byte)
         
@@ -381,7 +407,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == False:
                 new_byte = clearbit(leaf_byte, 5)
             else:
-                raise AttributeError('invalid has_leafcrown value')
+                raise ValueError('invalid has_leafcrown value')
             
             return self.set('B', 0x41, new_byte)
         
@@ -409,7 +435,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     
     def attr__nickname(self, value=None):
         "Pokémon nickname."
-        
+
         return self.getset_string(offset=0x48, length=10, value=value)
     
     def attr__hometown(self, value=None):
@@ -426,6 +452,10 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         "Date when the egg was received."
 
         if value is not None:
+            # make sure it's not negative
+            if value[0] < 2000:
+                value[0] += 2000
+            
             self.set('B', 0x78, (value[0]-2000)) # year - 2000
             self.set('B', 0x79, value[1]) # month
             self.set('B', 0x7A, value[2]) # day
@@ -444,6 +474,10 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         "Date when the Pokémon was met."
 
         if value is not None:
+            # make sure it's not negative
+            if value[0] < 2000:
+                value[0] += 2000
+            
             self.set('B', 0x7B, (value[0]-2000)) # year - 2000
             self.set('B', 0x7C, value[1]) # month
             self.set('B', 0x7D, value[2]) # day
@@ -511,7 +545,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == 'f':
                 new_byte = setbit(gender_byte, 7)
             else:
-                raise AttributeError('invalid ot_gender value')
+                raise ValueError('invalid ot_gender value')
             
             self.set('B', 0x84, new_byte)
         
