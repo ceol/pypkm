@@ -95,9 +95,6 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     
     def attr__ability(self, value=None):
         "Ability ID."
-
-        if value < 0 or value > 164:
-            raise ValueError('ability ID not in range')
         
         return self.getset(fmt='B', offset=0x15, value=value)
     
@@ -116,19 +113,16 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     def attr__language(self, value=None):
         "Language ID."
         
-        languages = {
-            0x01: 'jp',
-            0x02: 'en',
-            0x03: 'fr',
-            0x04: 'it',
-            0x05: 'de',
-            0x07: 'es',
-            0x08: 'kr',
-        }
+        #languages = {
+        #    0x01: 'jp',
+        #    0x02: 'en',
+        #    0x03: 'fr',
+        #    0x04: 'it',
+        #    0x05: 'de',
+        #    0x07: 'es',
+        #    0x08: 'kr',
+        #}
 
-        if languages.get(value) is None:
-            raise ValueError('invalid language value')
-        
         return self.getset(fmt='B', offset=0x17, value=value)
     
     def attr__hp_ev(self, value=None):
@@ -295,8 +289,6 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
                 new_byte = setbit(egg_byte, 30)
             elif value == False:
                 new_byte = clearbit(egg_byte, 30)
-            else:
-                raise ValueError('invalid is_egg value')
             
             return self.set('L', 0x38, new_byte)
         
@@ -312,8 +304,6 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
                 new_byte = setbit(nick_byte, 31)
             elif value == False:
                 new_byte = clearbit(nick_byte, 31)
-            else:
-                raise ValueError('invalid is_nicknamed value')
             
             return self.set('L', 0x38, new_byte)
                 
@@ -329,8 +319,6 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
                 new_byte = setbit(fate_byte, 0)
             elif value == False:
                 new_byte = clearbit(fate_byte, 0)
-            else:
-                raise ValueError('invalid is_fateful value')
             
             return self.set('B', 0x40, new_byte)
         
@@ -361,8 +349,6 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == 'n':
                 new_byte = clearbit(gender_byte, 1)
                 new_byte = setbit(new_byte, 2)
-            else:
-                raise ValueError('invalid gender value')
 
             return self.set('B', 0x40, new_byte)
         
@@ -382,8 +368,6 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
                 new_byte = setbit(leaf_byte, 5)
             elif value == False:
                 new_byte = clearbit(leaf_byte, 5)
-            else:
-                raise ValueError('invalid has_leafcrown value')
             
             return self.set('B', 0x41, new_byte)
         
@@ -520,8 +504,6 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
                 new_byte = clearbit(gender_byte, 7)
             elif value == 'f':
                 new_byte = setbit(gender_byte, 7)
-            else:
-                raise ValueError('invalid ot_gender value')
             
             self.set('B', 0x84, new_byte)
         
