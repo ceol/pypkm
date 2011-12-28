@@ -31,6 +31,12 @@ class BinaryFile(object):
     # that's the case, then just save the last revision in here.
     file_history = []
 
+    # Directory where this file exists (for database)
+    this_dir = ''
+
+    def __init__(self):
+        self.this_dir = os.path.dirname(os.path.abspath(__file__))
+
     def get_data(self):
         "Retrieve the current working data."
 
@@ -300,8 +306,7 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            this_dir = os.path.dirname(os.path.abspath(__file__))
-            conn = sqlite3.connect(os.path.join(this_dir, 'pypkm.sqlite'))
+            conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
             db = conn.cursor()
 
         string = ''
@@ -338,8 +343,7 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            this_dir = os.path.dirname(os.path.abspath(__file__))
-            conn = sqlite3.connect(os.path.join(this_dir, 'pypkm.sqlite'))
+            conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
             db = conn.cursor()
         
         count = 1
@@ -389,6 +393,75 @@ class PkmBinaryFile(BinaryFile):
             return self.set_string(offset, length, value)
         
         return self.get_string(offset, length)
+    
+    def get_growthrate(self, pokemon_id):
+        """Retrieve the growth rate ID of a Pokémon by its National Dex ID.
+
+        Keyword arguments:
+        pokemon_id (int) -- the national dex ID of the Pokémon
+        """
+
+        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
+        db = conn.cursor()
+
+        query = 'SELECT `growth_rate_id` FROM `pokemon_growth_rates` WHERE `pokemon_id` = ?'
+        growth_id = db.execute(query, (id_,)).fetchone()[0]
+
+        db.close()
+
+        return growth_id
+    
+    def get_level(self, pokemon_id, exp):
+        """Retrieve the level of a Pokémon by their experience points.
+
+        Keyword arguments:
+        pokemon_id (int) -- the national dex ID of the Pokémon
+        exp (int) -- the experience points of the Pokémon
+        """
+        
+        growth_id = self.get_growthrate(pokemon_id)
+
+        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
+        db = conn.cursor()
+
+        # select the level that's closest to the pokemon's exp without going over
+        query = 'SELECT `level` FROM `levels` WHERE `growth_rate_id` = ? AND `experience` <= ? ORDER BY `experience` DESC LIMIT 1'
+        level = db.execute(query, (growth_id,exp)).fetchone()[0]
+
+        db.close()
+
+        return level
+    
+    def get_exp(self, pokemon_id, level):
+        """Retrieve the experiance points of a Pokémon by their level.
+
+        Keyword arguments:
+        pokemon_id (int) -- the national dex ID of the Pokémon
+        level (int) -- the level of the Pokémon
+        """
+
+        growth_id = self.get_growthrate(pokemon_id)
+
+        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
+        db = conn.cursor()
+
+        # select the exp using the growth ID and level
+        query = 'SELECT `experience` FROM `levels` WHERE `growth_id` = ? AND `level` = ?'
+        exp = db.execute(query, (growth_id,level)).fetchone()[0]
+
+        return exp
+    
+    def calcstat(self, iv, ev, base, level, is_hp=False):
+        """Calculate the stat of a Pokémon based on provided information.
+
+        Keyword arguments:
+        iv (int) -- IV stat
+        ev (int) -- EV stat
+        base (int) -- base stat (from lookup table)
+        level (int) -- level (1-100)
+        is_hp (bool) -- whether the stat is HP (different calculation)
+        """
+        pass
     
     def checksum_data(self, data=None):
         """Returns the appropriate slice for calculating the file checksum.
