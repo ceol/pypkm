@@ -218,12 +218,6 @@ class BinaryFile(object):
 class PkmBinaryFile(BinaryFile):
     "Extension of the BinaryFile class for PKM files."
 
-    # SQLite database
-    db_name = 'pypkm.sqlite'
-
-    # SQLite cursor
-    db = None
-
     def __init__(self):
         super(PkmBinaryFile, self).__init__()
 
@@ -306,10 +300,9 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            if self.db is None:
-                this_dir = os.path.dirname(os.path.abspath(__file__))
-                conn = sqlite3.connect(os.path.join(this_dir, self.db_name))
-                self.db = conn.cursor()
+            this_dir = os.path.dirname(os.path.abspath(__file__))
+            conn = sqlite3.connect(os.path.join(this_dir, 'pypkm.sqlite'))
+            db = conn.cursor()
 
         string = ''
         term_byte = offset + (offset * 2)
@@ -325,13 +318,12 @@ class PkmBinaryFile(BinaryFile):
                 string += unichr(ord_)
             elif self.is_gen(4):
                 query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
-                string += self.db.execute(query, (ord_,)).fetchone()[0]
+                string += db.execute(query, (ord_,)).fetchone()[0]
 
             offset += 2
         
-        if self.db is not None:
-            self.db.close()
-            self.db = None
+        if self.is_gen(4):
+            db.close()
         
         return string
     
@@ -346,10 +338,9 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            if self.db is None:
-                this_dir = os.path.dirname(os.path.abspath(__file__))
-                conn = sqlite3.connect(os.path.join(this_dir, self.db_name))
-                self.db = conn.cursor()
+            this_dir = os.path.dirname(os.path.abspath(__file__))
+            conn = sqlite3.connect(os.path.join(this_dir, 'pypkm.sqlite'))
+            db = conn.cursor()
         
         count = 1
         term_byte = offset + (offset * 2)
@@ -363,7 +354,7 @@ class PkmBinaryFile(BinaryFile):
                     word = ord(letter.decode('utf8'))
                 elif self.is_gen(4):
                     query = 'SELECT `id` FROM `charmap` WHERE `character` = ?'
-                    word = self.db.execute(query, (letter,)).fetchone()[0]
+                    word = db.execute(query, (letter,)).fetchone()[0]
             else:
                 if self.is_gen(4):
                     # in gen 5, the bytes immediately after the last
@@ -383,8 +374,7 @@ class PkmBinaryFile(BinaryFile):
             offset += 2
         
         if self.is_gen(4):
-            self.db.close()
-            self.db = None
+            db.close()
         
         return
     
