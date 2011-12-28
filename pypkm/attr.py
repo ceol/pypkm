@@ -258,55 +258,31 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     def attr__hp_iv(self, value=None):
         "Hit point individual value."
 
-        if value is not None:
-            if value not in range(32):
-                raise ValueError('HP IV value not in range')
-
         return self.getset_iv(mask=0x0000001f, shift=0, value=value)
     
     def attr__atk_iv(self, value=None):
         "Attack individual value."
 
-        if value is not None:
-            if value not in range(32):
-                raise ValueError('Attack IV value not in range')
-        
         return self.getset_iv(mask=0x000003e0, shift=5, value=value)
     
     def attr__def_iv(self, value=None):
         "Defense individual value."
 
-        if value is not None:
-            if value not in range(32):
-                raise ValueError('Defense IV value not in range')
-        
         return self.getset_iv(mask=0x00007c00, shift=10, value=value)
     
     def attr__spe_iv(self, value=None):
         "Speed individual value."
 
-        if value is not None:
-            if value not in range(32):
-                raise ValueError('Speed IV value not in range')
-        
         return self.getset_iv(mask=0x000f8000, shift=15, value=value)
     
     def attr__spa_iv(self, value=None):
         "Special attack individual value."
 
-        if value is not None:
-            if value not in range(32):
-                raise ValueError('Special Attack IV value not in range')
-        
         return self.getset_iv(mask=0x01f00000, shift=20, value=value)
     
     def attr__spd_iv(self, value=None):
         "Special defense individual value."
 
-        if value is not None:
-            if value not in range(32):
-                raise ValueError('Special Defense IV value not in range')
-        
         return self.getset_iv(mask=0x3e000000, shift=25, value=value)
     
     def attr__is_egg(self, value=None):
