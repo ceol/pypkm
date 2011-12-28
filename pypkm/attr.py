@@ -58,7 +58,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         """Checksum.
         
         This should only be edited when the byte data is changed. Use the
-        appropriate pypkm.util function to calculate.
+        appropriate pypkm.utils function to calculate.
         """
         
         return self.getset(fmt='H', offset=0x06, value=value)
