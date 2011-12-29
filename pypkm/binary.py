@@ -229,6 +229,12 @@ class PkmBinaryFile(BinaryFile):
 
         self.set_filetype('PKM')
     
+    def _get_cursor(self):
+        "Return a SQLite cursor for queries."
+        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
+        
+        return conn.cursor()
+    
     def get_gen(self):
         "Return the file's generation."
 
@@ -306,8 +312,7 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
-            db = conn.cursor()
+            db = self._get_cursor()
 
         string = ''
         term_byte = offset + (offset * 2)
@@ -343,8 +348,7 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
-            db = conn.cursor()
+            db = self._get_cursor()
         
         count = 1
         term_byte = offset + (offset * 2)
@@ -401,11 +405,10 @@ class PkmBinaryFile(BinaryFile):
         pokemon_id (int) -- the national dex ID of the Pokémon
         """
 
-        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
-        db = conn.cursor()
+        db = self._get_cursor()
 
         query = 'SELECT `growth_rate_id` FROM `pokemon_growth_rates` WHERE `pokemon_id` = ?'
-        growth_id = db.execute(query, (id_,)).fetchone()[0]
+        growth_id = db.execute(query, (pokemon_id,)).fetchone()[0]
 
         db.close()
 
@@ -421,8 +424,7 @@ class PkmBinaryFile(BinaryFile):
         
         growth_id = self.get_growthrate(pokemon_id)
 
-        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
-        db = conn.cursor()
+        db = self._get_cursor()
 
         # select the level that's closest to the pokemon's exp without going over
         query = 'SELECT `level` FROM `levels` WHERE `growth_rate_id` = ? AND `experience` <= ? ORDER BY `experience` DESC LIMIT 1'
@@ -449,9 +451,44 @@ class PkmBinaryFile(BinaryFile):
         query = 'SELECT `experience` FROM `levels` WHERE `growth_id` = ? AND `level` = ?'
         exp = db.execute(query, (growth_id,level)).fetchone()[0]
 
+        db.close()
+
         return exp
     
-    def calcstat(self, iv, ev, base, level, is_hp=False):
+    def get_nature(self, nature_id):
+        """Retrieves a set of information about a nature.
+
+        Keyword arguments:
+        nature_id (int) -- the ID of the nature (0-24)
+        """
+
+        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
+        db = conn.cursor()
+
+        query = 'SELECT `id`, `name`, `atk`, `def`, `spe`, `spa`, `spd` FROM `natures` WHERE `id` = ?'
+        nature = db.execute(query, (nature_id,)).fetchone()
+
+        db.close()
+
+        return nature
+    
+    def get_basestats(self, pokemon_id, alt_form=0):
+        """Retrieve base stats for a Pokémon.
+
+        Keyword arguments:
+        pokemon_id (int) -- the national dex ID
+        alt_form (int) -- the optional alternate form
+        """
+
+        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
+        db = conn.cursor()
+
+        query = 'SELECT `base_hp`, `base_atk`, `base_def`, `base_spe`, `base_spa`, `base_spd` FROM `pokemon_base_stats` WHERE `pokemon_id` = ? AND `pokemon_form_id` = ?'
+        base_stats = db.execute(query, (pokemon_id, alt_form)).fetchone()
+
+        return base_stats
+    
+    def calcstat(self, iv, ev, base, level, nature_stat):
         """Calculate the stat of a Pokémon based on provided information.
 
         Keyword arguments:
@@ -459,11 +496,22 @@ class PkmBinaryFile(BinaryFile):
         ev (int) -- EV stat
         base (int) -- base stat (from lookup table)
         level (int) -- level (1-100)
-        is_hp (bool) -- whether the stat is HP (different calculation)
+        nature_stat (mixed) -- the stat's nature multiplier (set to None if HP)
         """
-        pass
+
+        # if hp
+        if nature_stat is None:
+            num = (iv + (2 * base) + (ev / 4) + 100) * level
+            denom = 100
+
+            return (num / denom) + 10
+        else:
+            num = (iv + (2 * base) + (ev / 4) + 100) * level
+            denom = 100
+
+            return ((num / denom) + 5) * nature_stat
     
-    def checksum_data(self, data=None):
+    def get_checksum(self, data=None):
         """Returns the appropriate slice for calculating the file checksum.
 
         Keyword arguments:
@@ -474,6 +522,14 @@ class PkmBinaryFile(BinaryFile):
             data = self.get_data()
         
         return data[0x08:0x88]
+    
+    def get_boxdata(self, data=None):
+        "Return the first 136 bytes of PKM data."
+
+        if data is None:
+            data = self.get_data()
+
+        return data[0:136]
     
     def new(self, gen):
         """Create the PKM from scratch.
