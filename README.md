@@ -5,7 +5,7 @@
 PyPKM is a [Python][0] [package][1] for creating, editing, and manipulating
 individual Pokémon file data (commonly referred to as PKM or .pkm files).
 The goal of this project is to allow a cross-platform way to easily work
-with these files in an intuitive way.
+with these files.
 
 PyPKM supports [generation IV][2] and [generation V][3] PKM files.
 
@@ -17,16 +17,16 @@ PyPKM supports [generation IV][2] and [generation V][3] PKM files.
 ## Installation
 
 To install PyPKM, download and unarchive the package from its [git repository][4].
-Then, you can either `cd` into the newly-created `pypkm` directory and run
+Then, you can either `cd` into the newly-created directory and run
 `python setup.py install` to install in your global Python path, or you can
-open the `pypkm` directory and manually copy the `pypkm` subdirectory to a
-place in your Python path.
+enter the directory and manually copy the `pypkm` subdirectory to a place in
+your Python path.
 
 [4]: https://github.com/ceol/pypkm
 
 ## Usage
 
-First, import the `Pkm` class from the `pypkm` package:
+First, import the `pypkm` package:
 
     import pypkm
 

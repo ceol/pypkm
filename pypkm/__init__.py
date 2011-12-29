@@ -14,9 +14,9 @@ Example usage:
     >>> pkm.exp = 10000
     >>> pkm.save()
     gengar_new.pkm
-    >>> pkm.exp = 5000
-    >>> pkm.save('gengar_50.pkm')
-    gengar_50.pkm
+    >>> pkm.toparty()
+    >>> pkm.save('gengar_party.pkm')
+    gengar_party.pkm
 
 For instructions on how to set a specific attribute, refer to that
 attribute's function in the Pkm class.
