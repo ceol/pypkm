@@ -62,7 +62,7 @@ class PkmBase(PkmAttrMapper):
         base_stats = self.get_basestats(pokemon_id=self.id)
 
         curhp_stat = self.calcstat(iv=self.hp_iv, ev=self.hp_ev, base=base_stats[0], level=level, nature_stat=None)
-        maxhp_stat = chp_stat
+        maxhp_stat = curhp_stat
         atk_stat = self.calcstat(iv=self.atk_iv, ev=self.atk_ev, base=base_stats[1], level=level, nature_stat=nature[2])
         def_stat = self.calcstat(iv=self.def_iv, ev=self.def_ev, base=base_stats[2], level=level, nature_stat=nature[3])
         spe_stat = self.calcstat(iv=self.spe_iv, ev=self.spe_ev, base=base_stats[3], level=level, nature_stat=nature[4])
