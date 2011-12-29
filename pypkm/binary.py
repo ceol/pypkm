@@ -3,6 +3,7 @@
 import os
 import struct
 import sqlite3
+from math import floor
 
 class BinaryFile(object):
     """Core binary editing functionality.
@@ -501,15 +502,17 @@ class PkmBinaryFile(BinaryFile):
 
         # if hp
         if nature_stat is None:
-            num = (iv + (2 * base) + (ev / 4) + 100) * level
+            num = (iv + (2 * base) + (ev / 4.0) + 100) * level
             denom = 100
+            stat = (num / denom) + 10
 
-            return (num / denom) + 10
+            return int(floor(stat))
         else:
-            num = (iv + (2 * base) + (ev / 4) + 100) * level
+            num = (iv + (2 * base) + (ev / 4.0)) * level
             denom = 100
+            stat = (num / denom) + 5
 
-            return ((num / denom) + 5) * nature_stat
+            return int(floor(floor(stat) * nature_stat))
     
     def get_checksum(self, data=None):
         """Returns the appropriate slice for calculating the file checksum.
