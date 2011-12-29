@@ -490,14 +490,20 @@ class PkmBinaryFile(BinaryFile):
         return base_stats
     
     def calcstat(self, iv, ev, base, level, nature_stat):
-        """Calculate the stat of a Pokémon based on provided information.
+        """Calculate the battle stat of a Pokémon.
+
+        Note that some stats may be off by one compared to the "official"
+        PKM data. I've only found this to be true on a specific FAL2010 Mew
+        file, but it's worth mentioning. If you would like to be safe,
+        deposit the Pokémon in the Day Care and take it back out to recreate
+        the battle data.
 
         Keyword arguments:
         iv (int) -- IV stat
         ev (int) -- EV stat
         base (int) -- base stat (from lookup table)
         level (int) -- level (1-100)
-        nature_stat (mixed) -- the stat's nature multiplier (set to None if HP)
+        nature_stat (float) -- the stat's nature multiplier (set to None if HP)
         """
 
         # if hp
