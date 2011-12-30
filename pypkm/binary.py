@@ -4,6 +4,7 @@ import os
 import struct
 import sqlite3
 from math import floor
+from pypkm.sqlite import get_cursor
 
 class BinaryFile(object):
     """Core binary editing functionality.
@@ -31,12 +32,6 @@ class BinaryFile(object):
     # memory issue if there are too many changes in a single session. If
     # that's the case, then just save the last revision in here.
     file_history = []
-
-    # Directory where this file exists (for database)
-    this_dir = ''
-
-    def __init__(self):
-        self.this_dir = os.path.dirname(os.path.abspath(__file__))
 
     def get_data(self):
         "Retrieve the current working data."
@@ -230,12 +225,6 @@ class PkmBinaryFile(BinaryFile):
 
         self.set_filetype('PKM')
     
-    def _get_cursor(self):
-        "Return a SQLite cursor for queries."
-        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
-        
-        return conn.cursor()
-    
     def get_gen(self):
         "Return the file's generation."
 
@@ -313,7 +302,7 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            db = self._get_cursor()
+            db = self.get_cursor()
 
         string = ''
         term_byte = offset + (offset * 2)
@@ -349,7 +338,7 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            db = self._get_cursor()
+            db = self.get_cursor()
         
         count = 1
         term_byte = offset + (offset * 2)
@@ -406,7 +395,7 @@ class PkmBinaryFile(BinaryFile):
         pokemon_id (int) -- the national dex ID of the Pokémon
         """
 
-        db = self._get_cursor()
+        db = self.get_cursor()
 
         query = 'SELECT `growth_rate_id` FROM `pokemon_growth_rates` WHERE `pokemon_id` = ?'
         growth_id = db.execute(query, (pokemon_id,)).fetchone()[0]
@@ -425,7 +414,7 @@ class PkmBinaryFile(BinaryFile):
         
         growth_id = self.get_growthrate(pokemon_id)
 
-        db = self._get_cursor()
+        db = self.get_cursor()
 
         # select the level that's closest to the pokemon's exp without going over
         query = 'SELECT `level` FROM `levels` WHERE `growth_rate_id` = ? AND `experience` <= ? ORDER BY `experience` DESC LIMIT 1'
