@@ -49,6 +49,10 @@ def _shuffle(pv, data):
      
     The previous comment section (along with basically this entire function)
     was stolen directly from tsanth's code because it's great.
+
+    Keyword arguments:
+    pv (longint) -- personality value
+    data (string) -- 128 byte length of Pokémon data
     """
         
     # Pad the data to fit into a multiple of 4.
@@ -85,21 +89,42 @@ def _shuffle(pv, data):
     return shuffledblocks
 
 def _crypt(seed, data):
-    "Encrypts data with the given seed."
+    """Encrypts data with the given seed.
+
+    Keyword arguments:
+    seed (int) -- the seed to use in the LC RNG
+    data (string) -- the Pokémon data to process
+    """
     pass
 
 def encrypt(data):
-    "Encrypt PKM data."
+    """Encrypt PKM data.
+
+    Keyword arguments:
+    data (string) -- the Pokémon data to encrypt
+    """
     pass
 
 def decrypt(data):
-    "Decrypt PKM data."
+    """Decrypt PKM data.
+
+    Keyword arguments:
+    data (string) -- the Pokémon data to decrypt
+    """
     pass
 
 def encrypt_gts(data):
-    "Encrypt PKM data for use in the GTS."
+    """Encrypt PKM data for use in the GTS.
+
+    Keyword arguments:
+    data (string) -- the Pokémon data to encrypt
+    """
     pass
 
 def decrypt_gts(data):
-    "Decrypt PKM data sent over the GTS."
+    """Decrypt PKM data sent over the GTS.
+
+    Keyword arguments:
+    data (string) -- the Pokémon data to decrypt
+    """
     pass
