@@ -1,5 +1,9 @@
 # coding=utf-8
 
+"Binary data manipulation."
+
+__author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
+
 import os
 import struct
 import sqlite3
@@ -302,7 +306,7 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            db = self.get_cursor()
+            db = get_cursor()
 
         string = ''
         term_byte = offset + (offset * 2)
@@ -338,7 +342,7 @@ class PkmBinaryFile(BinaryFile):
         """
 
         if self.is_gen(4):
-            db = self.get_cursor()
+            db = get_cursor()
         
         count = 1
         term_byte = offset + (offset * 2)
@@ -395,7 +399,7 @@ class PkmBinaryFile(BinaryFile):
         pokemon_id (int) -- the national dex ID of the Pokémon
         """
 
-        db = self.get_cursor()
+        db = get_cursor()
 
         query = 'SELECT `growth_rate_id` FROM `pokemon_growth_rates` WHERE `pokemon_id` = ?'
         growth_id = db.execute(query, (pokemon_id,)).fetchone()[0]
@@ -414,7 +418,7 @@ class PkmBinaryFile(BinaryFile):
         
         growth_id = self.get_growthrate(pokemon_id)
 
-        db = self.get_cursor()
+        db = get_cursor()
 
         # select the level that's closest to the pokemon's exp without going over
         query = 'SELECT `level` FROM `levels` WHERE `growth_rate_id` = ? AND `experience` <= ? ORDER BY `experience` DESC LIMIT 1'
@@ -434,8 +438,7 @@ class PkmBinaryFile(BinaryFile):
 
         growth_id = self.get_growthrate(pokemon_id)
 
-        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
-        db = conn.cursor()
+        db = get_cursor()
 
         # select the exp using the growth ID and level
         query = 'SELECT `experience` FROM `levels` WHERE `growth_id` = ? AND `level` = ?'
@@ -452,8 +455,7 @@ class PkmBinaryFile(BinaryFile):
         nature_id (int) -- the ID of the nature (0-24)
         """
 
-        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
-        db = conn.cursor()
+        db = get_cursor()
 
         query = 'SELECT `id`, `name`, `atk`, `def`, `spe`, `spa`, `spd` FROM `natures` WHERE `id` = ?'
         nature = db.execute(query, (nature_id,)).fetchone()
@@ -470,8 +472,7 @@ class PkmBinaryFile(BinaryFile):
         alt_form (int) -- the optional alternate form
         """
 
-        conn = sqlite3.connect(os.path.join(self.this_dir, 'pypkm.sqlite'))
-        db = conn.cursor()
+        db = get_cursor()
 
         query = 'SELECT `base_hp`, `base_atk`, `base_def`, `base_spe`, `base_spa`, `base_spd` FROM `pokemon_base_stats` WHERE `pokemon_id` = ? AND `pokemon_form_id` = ?'
         base_stats = db.execute(query, (pokemon_id, alt_form)).fetchone()

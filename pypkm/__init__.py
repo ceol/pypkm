@@ -38,6 +38,7 @@ import os
 import sqlite3
 import struct
 from pypkm.attr import PkmAttrMapper
+from pypkm.crypt import encrypt, encrypt_gts, decrypt, decrypt_gts
 
 class PkmBase(PkmAttrMapper):
     "Base class for the Pkm class."
@@ -81,6 +82,26 @@ class PkmBase(PkmAttrMapper):
         self.add_data(new_data)
 
         return new_data
+    
+    def encrypt(self):
+        "Encrypt PKM data."
+        
+        return encrypt(self.get_data())
+    
+    def decrypt(self):
+        "Decrypt PKM data."
+        
+        return decrypt(self.get_data())
+    
+    def encrypt_gts(self):
+        "Encrypt PKM data for use in the GTS."
+        
+        return encrypt_gts(self.get_data())
+    
+    def decrypt_gts(self):
+        "Decrypt PKM data sent over the GTS."
+        
+        return decrypt_gts(self.get_data())
 
 class Pkm(PkmBase):
     "Wrapper class for all PKM file manipulation."
