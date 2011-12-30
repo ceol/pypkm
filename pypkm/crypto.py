@@ -82,6 +82,8 @@ class Prng(Rng):
     """
     
     def __init__(self, seed=0):
+        super(Prng, self).__init__()
+
         self.seed = seed
         self.mult = 0x41C64E6D
         self.add = 0x6073
@@ -95,9 +97,28 @@ class Arng(Rng):
     """
     
     def __init__(self, seed=0):
+        super(Arng, self).__init__()
+
         self.seed = seed
         self.mult = 0x6C078965
         self.add = 0x1
+
+class Grng(Rng):
+    """Extension of the LC RNG used in GTS encryption and decryption.
+
+    This LC RNG is seeded with the checksum and 
+    """
+
+    def __init__(self, seed=0):
+        super(Grng, self).__init__()
+
+        self.seed = seed | (seed << 16)
+        self.mult = 0x45
+        self.add = 0x1111
+        self.mask = 0x7FFFFFFF
+    
+    def _advance(self):
+        return (super(Grng, self)._advance()) & 0xFF
 
 class Mtrng(Rng):
     """Mersenne Twister wrapper.
