@@ -1,4 +1,4 @@
-# PyPKM - PKM File Manipulation
+# PyPKM - Pokémon File Manipulation
 
 ## Introduction
 

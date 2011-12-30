@@ -63,7 +63,7 @@ class Rng(object):
         for i in range(steps):
             self.frames.append(self._advance())
         
-        return self.frames.pop()
+        return self.frames[-1]
     
     def _reverse(self):
         "Calculate the previous LC RNG step."
