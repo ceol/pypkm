@@ -205,14 +205,14 @@ def encrypt(data):
 
     return _pack(pv, chksum, box_data, party_data)
 
-def decrypt(bin):
+def decrypt(data):
     """Decrypt a PKM binary.
 
     Keyword arguments:
-    bin (string) -- PKM binary to decrypt
+    data (string) -- PKM binary to decrypt
     """
 
-    (pv, chksum, box_data, party_data) = _unpack(bin)
+    (pv, chksum, box_data, party_data) = _unpack(data)
     
     box_data = _crypt(chksum, box_data)
     box_data = _unshuffle(pv, box_data)
@@ -230,10 +230,10 @@ def encrypt_gts(data):
     """
     pass
 
-def decrypt_gts(bin):
+def decrypt_gts(data):
     """Decrypt PKM bin sent over the GTS.
 
     Keyword arguments:
-    bin (string) -- the Pokémon binary to decrypt
+    data (string) -- the Pokémon binary to decrypt
     """
     pass
