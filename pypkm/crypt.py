@@ -107,11 +107,20 @@ def _shuffle(pv, data):
 def _crypt(seed, data):
     """Encrypts data with the given seed.
 
+    Logic taken from tsanth's _crypt() function.
+
     Keyword arguments:
     seed (int) -- the seed to use in the LC RNG
     data (string) -- the Pokémon data to process
     """
-    pass
+
+    data = array('H', data)
+    lc = Prng(seed)
+
+    for word in data:
+        data.append(word ^ lc.advance())
+    
+    return data.tostring()
 
 def encrypt(data):
     """Encrypt PKM data.
