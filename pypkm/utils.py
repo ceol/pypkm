@@ -26,20 +26,3 @@ def getbit (i, bit):
     "Retrieve a bit from an int i."
     
     return (i >> bit) & 1
-
-def checksum(data, size='H'):
-    """Calculate the checksum of data using the size as the word-length.
-    
-    This defaults to 'H' (a two-byte word) because it's what the Pokémon
-    games use.
-    """
-    
-    data = array(size, data)
-    chksum = 0
-    
-    for word in data:
-        chksum += word
-    
-    chksum &= 0xFFFF
-    
-    return chksum

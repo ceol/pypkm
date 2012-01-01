@@ -5,7 +5,23 @@
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
 from pypkm.rng import Prng, Grng
-from pypkm.utils import checksum
+
+def checksum(data, size='H'):
+    """Calculate the checksum of data using the size as the word-length.
+    
+    This defaults to 'H' (a two-byte word) because it's what the Pokémon
+    games use.
+    """
+    
+    data = array(size, data)
+    chksum = 0
+    
+    for word in data:
+        chksum += word
+    
+    chksum &= 0xFFFF
+    
+    return chksum
 
 def _shuffle(pv, data):
     """Shuffle the data according to a shift value derived from the PV.
