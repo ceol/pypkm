@@ -83,6 +83,10 @@ class PkmBase(PkmAttrMapper):
 
         return new_data
     
+    def togts(self):
+        "Create PKM data to be transferred via the GTS."
+        pass
+    
     def encrypt(self):
         "Encrypt PKM data."
         

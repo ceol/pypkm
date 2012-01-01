@@ -4,9 +4,10 @@
 
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
+import struct
 from pypkm.rng import Prng, Grng
 
-def checksum(data, size='H'):
+def _checksum(data, size='H'):
     """Calculate the checksum of data using the size as the word-length.
     
     This defaults to 'H' (a two-byte word) because it's what the Pokémon
@@ -34,7 +35,6 @@ def _shuffle(pv, data):
     
     The data must be a multiple of 4 or it will be padded to fit. Most of the
     time, the supplied data will be 128 bytes (the length of Pokémon data).
-    Party data does NOT need to be encrypted, decrypted, or shuffled.
     
     The blocks are shifted in an ascending permutation.  To wit:
         00 = ABCD   01 = ABDC   02 = ACBD   03 = ACDB
@@ -104,8 +104,25 @@ def _shuffle(pv, data):
     
     return shuffledblocks
 
+def _pack(pv, chksum, data):
+    """Pack Pokémon data into a PKM file.
+
+    Keyword arguments:
+    pv (longint) -- the Pokémon's personality value
+    chksum (int) -- the data's checksum
+    data (string) -- the Pokémon data
+    """
+
+    chunks = [
+        struct.pack('L', pv),
+        '\x00\x00',
+        struct.pack('H', chksum),
+        data
+    ]
+    return ''.join(chunks)
+
 def _crypt(seed, data):
-    """Encrypts data with the given seed.
+    """Encrypts/decrypts data with the given seed.
 
     Logic taken from tsanth's _crypt() function.
 
@@ -122,21 +139,33 @@ def _crypt(seed, data):
     
     return data.tostring()
 
-def encrypt(data):
+def encrypt(pv, blocks):
     """Encrypt PKM data.
 
     Keyword arguments:
-    data (string) -- the Pokémon data to encrypt
+    pv (longint) -- the Pokémon's personality value
+    blocks (string) -- the Pokémon blocks to encrypt
     """
-    pass
+    
+    shuffled = _shuffle(pv, blocks)
+    chksum = _checksum(shuffled)
+    encrypted = _crypt(chksum, shuffled)
 
-def decrypt(data):
+    return _pack(pv, chksum, encrypted)
+
+def decrypt(pv, chksum, blocks):
     """Decrypt PKM data.
 
     Keyword arguments:
-    data (string) -- the Pokémon data to decrypt
+    pv (longint) -- the Pokémon's personality value
+    chksum (int) -- checksum of the decrypted blocks
+    blocks (string) -- the Pokémon blocks to decrypt
     """
-    pass
+    
+    decrypted = _crypt(chksum, blocks)
+    shuffled = _shuffle(pv, decrypted)
+
+    return _pack(pv, chksum, shuffled)
 
 def encrypt_gts(data):
     """Encrypt PKM data for use in the GTS.
