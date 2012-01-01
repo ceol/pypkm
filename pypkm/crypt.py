@@ -150,9 +150,9 @@ def _unpack(data):
     pv = struct.unpack('<L', data[:4])[0]
     chksum = struct.unpack('<H', data[6:8])[0]
 
-    return (pv, chksum, data[8:])
+    return (pv, chksum, data[8:136], data[136:])
 
-def _pack(pv, chksum, data):
+def _pack(pv, chksum, box_data, party_data):
     """Pack Pokémon data into a PKM file.
 
     Keyword arguments:
@@ -165,7 +165,8 @@ def _pack(pv, chksum, data):
         struct.pack('<L', pv),
         '\x00\x00',
         struct.pack('<H', chksum),
-        data
+        box_data,
+        party_data,
     ]
     return ''.join(chunks)
 
@@ -193,13 +194,16 @@ def encrypt(data):
     data (string) -- Pokémon data to encrypt
     """
     
-    (pv, chksum, blocks) = _unpack(data)
+    (pv, chksum, box_data, party_data) = _unpack(data)
 
-    blocks = _shuffle(pv, blocks)
-    chksum = _checksum(blocks)
-    blocks = _crypt(chksum, blocks)
+    box_data = _shuffle(pv, box_data)
+    chksum = _checksum(box_data)
+    box_data = _crypt(chksum, box_data)
 
-    return _pack(pv, chksum, blocks)
+    party_data = _shuffle(pv, party_data)
+    party_data = _crypt(pv, party_data)
+
+    return _pack(pv, chksum, box_data, party_data)
 
 def decrypt(bin):
     """Decrypt a PKM binary.
@@ -208,12 +212,15 @@ def decrypt(bin):
     bin (string) -- PKM binary to decrypt
     """
 
-    (pv, chksum, blocks) = _unpack(bin)
+    (pv, chksum, box_data, party_data) = _unpack(bin)
     
-    blocks = _crypt(chksum, blocks)
-    blocks = _unshuffle(pv, blocks)
+    box_data = _crypt(chksum, box_data)
+    box_data = _unshuffle(pv, box_data)
 
-    return _pack(pv, chksum, blocks)
+    party_data = _crypt(pv, party_data)
+    party_data = _unshuffle(pv, party_data)
+
+    return _pack(pv, chksum, box_data, party_data)
 
 def encrypt_gts(data):
     """Encrypt PKM data for use in the GTS.
