@@ -510,7 +510,7 @@ class PkmBinaryFile(BinaryFile):
 
             return int(floor(floor(stat) * nature_stat))
     
-    def get_checksum(self, data=None):
+    def get_checksumdata(self, data=None):
         """Returns the appropriate slice for calculating the file checksum.
 
         Keyword arguments:
