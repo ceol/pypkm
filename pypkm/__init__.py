@@ -32,7 +32,9 @@ ProjectPokemon <http://projectpokemon.org/>, both on the forums and in their
 IRC channel.
 """
 
-__author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
+__author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
+
+__version__ = '0.1'
 
 import os
 import sqlite3
