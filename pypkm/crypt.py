@@ -5,6 +5,7 @@
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
 import struct
+from array import array
 from pypkm.rng import Prng, Grng
 
 def _checksum(data, size='H'):
@@ -24,7 +25,40 @@ def _checksum(data, size='H'):
     
     return chksum
 
-def _shuffle(pv, data):
+def _unshuffle(pv, data):
+    """Unshuffle PKM binary data according to a shift value.
+
+    Unshuffling data has different permuations than shuffling data. Until I
+    figure out a way to convey this pattern mathematically, I'll have to
+    resort to hardcoding the stray permutations in a dict.
+
+    Keyword arguments:
+    pv (int) -- the Pokémon's personality value
+    data (int) -- the PKM data to unshuffle
+    """
+    stray_perms = {
+        8: 12,
+        9: 18,
+        10: 13,
+        11: 19,
+        12: 8,
+        13: 10,
+        15: 20,
+        17: 22,
+        18: 9,
+        19: 11,
+        20: 15,
+        22: 17,
+    }
+
+    shiftval = ((pv >> 0xD) & 0x1F) % 24
+
+    if stray_perms.get(shiftval) is None:
+        return _shuffle(pv, data)
+    
+    return _shuffle(pv, data, shiftval=stray_perms.get(shiftval))
+
+def _shuffle(pv, data, shiftval=None):
     """Shuffle the data according to a shift value derived from the PV.
     
     Data stored in .pkm files is split into five blocks: one unencrypted
@@ -67,8 +101,9 @@ def _shuffle(pv, data):
     was stolen directly from tsanth's code because it's great.
 
     Keyword arguments:
-    pv (longint) -- personality value
+    pv (int) -- personality value
     data (string) -- 128 byte length of Pokémon data
+    shiftval (int) -- optional forced shift value
     """
         
     # Pad the data to fit into a multiple of 4.
@@ -85,7 +120,8 @@ def _shuffle(pv, data):
     ]
     
     # The shift value is derived from the PV
-    shiftval = ((pv >> 0xD) & 0x1F) % 24
+    if shiftval is None:
+        shiftval = ((pv >> 0xD) & 0x1F) % 24
     
     blockorder = [
         shiftval / 6,
@@ -104,27 +140,37 @@ def _shuffle(pv, data):
     
     return shuffledblocks
 
+def _unpack(data):
+    """Unpack a PKM file into Pokémon data.
+
+    Keyword arguments:
+    data (string) -- the PKM file data
+    """
+
+    pv = struct.unpack('<L', data[:4])[0]
+    chksum = struct.unpack('<H', data[6:8])[0]
+
+    return (pv, chksum, data[8:])
+
 def _pack(pv, chksum, data):
     """Pack Pokémon data into a PKM file.
 
     Keyword arguments:
-    pv (longint) -- the Pokémon's personality value
+    pv (int) -- the Pokémon's personality value
     chksum (int) -- the data's checksum
     data (string) -- the Pokémon data
     """
 
     chunks = [
-        struct.pack('L', pv),
+        struct.pack('<L', pv),
         '\x00\x00',
-        struct.pack('H', chksum),
+        struct.pack('<H', chksum),
         data
     ]
     return ''.join(chunks)
 
 def _crypt(seed, data):
     """Encrypts/decrypts data with the given seed.
-
-    Logic taken from tsanth's _crypt() function.
 
     Keyword arguments:
     seed (int) -- the seed to use in the LC RNG
@@ -134,38 +180,40 @@ def _crypt(seed, data):
     data = array('H', data)
     lc = Prng(seed)
 
+    new_data = array('H')
     for word in data:
-        data.append(word ^ lc.advance())
+        new_data.append(word ^ lc.advance())
     
-    return data.tostring()
+    return new_data.tostring()
 
-def encrypt(pv, blocks):
+def encrypt(data):
     """Encrypt PKM data.
 
     Keyword arguments:
-    pv (longint) -- the Pokémon's personality value
-    blocks (string) -- the Pokémon blocks to encrypt
+    data (string) -- Pokémon data to encrypt
     """
     
-    shuffled = _shuffle(pv, blocks)
-    chksum = _checksum(shuffled)
-    encrypted = _crypt(chksum, shuffled)
+    (pv, chksum, blocks) = _unpack(data)
 
-    return _pack(pv, chksum, encrypted)
+    blocks = _shuffle(pv, blocks)
+    chksum = _checksum(blocks)
+    blocks = _crypt(chksum, blocks)
 
-def decrypt(pv, chksum, blocks):
-    """Decrypt PKM data.
+    return _pack(pv, chksum, blocks)
+
+def decrypt(bin):
+    """Decrypt a PKM binary.
 
     Keyword arguments:
-    pv (longint) -- the Pokémon's personality value
-    chksum (int) -- checksum of the decrypted blocks
-    blocks (string) -- the Pokémon blocks to decrypt
+    bin (string) -- PKM binary to decrypt
     """
-    
-    decrypted = _crypt(chksum, blocks)
-    shuffled = _shuffle(pv, decrypted)
 
-    return _pack(pv, chksum, shuffled)
+    (pv, chksum, blocks) = _unpack(bin)
+    
+    blocks = _crypt(chksum, blocks)
+    blocks = _unshuffle(pv, blocks)
+
+    return _pack(pv, chksum, blocks)
 
 def encrypt_gts(data):
     """Encrypt PKM data for use in the GTS.
@@ -175,10 +223,10 @@ def encrypt_gts(data):
     """
     pass
 
-def decrypt_gts(data):
-    """Decrypt PKM data sent over the GTS.
+def decrypt_gts(bin):
+    """Decrypt PKM bin sent over the GTS.
 
     Keyword arguments:
-    data (string) -- the Pokémon data to decrypt
+    bin (string) -- the Pokémon binary to decrypt
     """
     pass

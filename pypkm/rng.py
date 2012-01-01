@@ -51,16 +51,16 @@ class Rng(object):
         "Calculate the next LC RNG step."
         
         self.seed *= self.mult
-        self.seed &= self.mask
+        #self.seed &= self.mask
         self.seed += self.add
         self.seed &= self.mask
         
-        return self.seed >> self.WIDTH
+        return self.seed >> self.width
     
     def advance(self, steps=1):
         "Advance the LC RNG the specified number of steps."
         
-        for i in range(steps):
+        for i in range(0, steps):
             self.frames.append(self._advance())
         
         return self.frames[-1]

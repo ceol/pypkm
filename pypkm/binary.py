@@ -528,7 +528,15 @@ class PkmBinaryFile(BinaryFile):
         if data is None:
             data = self.get_data()
 
-        return data[0:136]
+        return data[:136]
+    
+    def get_cryptdata(self, data=None):
+        "Return the part of PKM data to be encrypted/decrypted."
+
+        if data is None:
+            data = self.get_data()
+
+        return data[8:136]
     
     def new(self, gen):
         """Create the PKM from scratch.
