@@ -33,7 +33,6 @@ IRC channel.
 """
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
-
 __version__ = '0.1'
 
 import os
@@ -93,6 +92,7 @@ class PkmBase(PkmAttrMapper):
         "Encrypt PKM data."
         
         encrypted_data = encrypt(self.get_data())
+        self.add_data(encrypted_data)
         
         return encrypted_data
     
@@ -100,6 +100,7 @@ class PkmBase(PkmAttrMapper):
         "Decrypt PKM data."
         
         decrypted_data = decrypt(self.get_boxdata())
+        self.add_data(decrypted_data)
 
         return decrypted_data
     
