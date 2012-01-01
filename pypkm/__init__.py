@@ -89,23 +89,19 @@ class PkmBase(PkmAttrMapper):
     
     def encrypt(self):
         "Encrypt PKM data."
-        
-        return encrypt(self.get_data())
+        pass
     
     def decrypt(self):
         "Decrypt PKM data."
-        
-        return decrypt(self.get_data())
+        pass
     
     def encrypt_gts(self):
         "Encrypt PKM data for use in the GTS."
-        
-        return encrypt_gts(self.get_data())
+        pass
     
     def decrypt_gts(self):
         "Decrypt PKM data sent over the GTS."
-        
-        return decrypt_gts(self.get_data())
+        pass
 
 class Pkm(PkmBase):
     "Wrapper class for all PKM file manipulation."
