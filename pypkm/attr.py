@@ -1,21 +1,11 @@
 # coding=utf-8
 
+"Map Pkm() attributes to function calls."
+
+__author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
+
 import sqlite3
-
 from pypkm.utils import getbit, setbit, clearbit
-from pypkm.binary import PkmBinaryFile
-
-def _get_cursor(path):
-    conn = sqlite3.connect(path)
-    return conn.cursor()
-
-def _get_letter(c, ord_):
-    query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
-    return c.execute(query, (ord_,)).fetchone()[0]
-
-def _get_ord(c, letter):
-    query = 'SELECT `id` FROM `charmap` WHERE `character` = ?'
-    return c.execute(query, (letter,)).fetchone()[0]
 
 class AttrMapper(object):
     "Core attribute mapping functionality."
@@ -39,12 +29,19 @@ class AttrMapper(object):
         except AttributeError:
             self.__dict__[name] = value
 
-class PkmAttrMapper(AttrMapper, PkmBinaryFile):
+class PkmAttrMapper(object):
     """Functions used to map attribute calls.
 
     PkmAttrMapper relies on the child class also extending PkmBinaryFile to
     use the get and set methods.
     """
+
+    # Instance of PkmBinaryFile already initialized
+    bin = None
+
+    def __init__(self, bin_=None):
+        if bin_ is not None:
+            self.bin = bin_
     
     def attr__pv(self, value=None):
         """Personality value.
@@ -52,7 +49,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         Note: Do NOT edit this unless you know what you are doing!
         """
 
-        return self.getset(fmt='L', offset=0x00, value=value)
+        return self.bin.getset(fmt='L', offset=0x00, value=value)
             
     def attr__checksum(self, value=None):
         """Checksum.
@@ -61,42 +58,42 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         appropriate pypkm.utils function to calculate.
         """
         
-        return self.getset(fmt='H', offset=0x06, value=value)
+        return self.bin.getset(fmt='H', offset=0x06, value=value)
     
     def attr__id(self, value=None):
         "National Pokédex ID."
         
-        return self.getset(fmt='H', offset=0x08, value=value)
+        return self.bin.getset(fmt='H', offset=0x08, value=value)
     
     def attr__item(self, value=None):
         "Held item ID."
         
-        return self.getset(fmt='H', offset=0x0A, value=value)
+        return self.bin.getset(fmt='H', offset=0x0A, value=value)
     
     def attr__ot_id(self, value=None):
         "Original trainer ID."
         
-        return self.getset(fmt='H', offset=0x0C, value=value)
+        return self.bin.getset(fmt='H', offset=0x0C, value=value)
     
     def attr__ot_secret_id(self, value=None):
         "Original trainer secret ID."
         
-        return self.getset(fmt='H', offset=0x0E, value=value)
+        return self.bin.getset(fmt='H', offset=0x0E, value=value)
     
     def attr__exp(self, value=None):
         "Experience points total."
         
-        return self.getset(fmt='L', offset=0x10, value=value)
+        return self.bin.getset(fmt='L', offset=0x10, value=value)
     
     def attr__happiness(self, value=None):
         "Happiness (or steps to hatch if an egg)."
         
-        return self.getset(fmt='B', offset=0x14, value=value)
+        return self.bin.getset(fmt='B', offset=0x14, value=value)
     
     def attr__ability(self, value=None):
         "Ability ID."
         
-        return self.getset(fmt='B', offset=0x15, value=value)
+        return self.bin.getset(fmt='B', offset=0x15, value=value)
     
     def attr__markings(self, value=None):
         "PC box markings."
@@ -123,67 +120,67 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         #    0x08: 'kr',
         #}
 
-        return self.getset(fmt='B', offset=0x17, value=value)
+        return self.bin.getset(fmt='B', offset=0x17, value=value)
     
     def attr__hp_ev(self, value=None):
         "Hit points effort value."
         
-        return self.getset(fmt='B', offset=0x18, value=value)
+        return self.bin.getset(fmt='B', offset=0x18, value=value)
     
     def attr__atk_ev(self, value=None):
         "Attack effort value."
         
-        return self.getset(fmt='B', offset=0x19, value=value)
+        return self.bin.getset(fmt='B', offset=0x19, value=value)
     
     def attr__def_ev(self, value=None):
         "Defense effort value."
         
-        return self.getset(fmt='B', offset=0x1A, value=value)
+        return self.bin.getset(fmt='B', offset=0x1A, value=value)
     
     def attr__spe_ev(self, value=None):
         "Speed effort value."
         
-        return self.getset(fmt='B', offset=0x1B, value=value)
+        return self.bin.getset(fmt='B', offset=0x1B, value=value)
     
     def attr__spa_ev(self, value=None):
         "Special attack effort value."
         
-        return self.getset(fmt='B', offset=0x1C, value=value)
+        return self.bin.getset(fmt='B', offset=0x1C, value=value)
     
     def attr__spd_ev(self, value=None):
         "Special defense effort value."
         
-        return self.getset(fmt='B', offset=0x1D, value=value)
+        return self.bin.getset(fmt='B', offset=0x1D, value=value)
     
     def attr__cool_cv(self, value=None):
         "Cool contest value."
         
-        return self.getset(fmt='B', offset=0x1E, value=value)
+        return self.bin.getset(fmt='B', offset=0x1E, value=value)
     
     def attr__beauty_cv(self, value=None):
         "Beauty contest value."
         
-        return self.getset(fmt='B', offset=0x1F, value=value)
+        return self.bin.getset(fmt='B', offset=0x1F, value=value)
     
     def attr__cute_cv(self, value=None):
         "Cute contest value."
         
-        return self.getset(fmt='B', offset=0x20, value=value)
+        return self.bin.getset(fmt='B', offset=0x20, value=value)
     
     def attr__smart_cv(self, value=None):
         "Smart contest value."
         
-        return self.getset(fmt='B', offset=0x21, value=value)
+        return self.bin.getset(fmt='B', offset=0x21, value=value)
     
     def attr__tough_cv(self, value=None):
         "Tough contest value."
         
-        return self.getset(fmt='B', offset=0x22, value=value)
+        return self.bin.getset(fmt='B', offset=0x22, value=value)
     
     def attr__sheen_cv(self, value=None):
         "Sheen contest value."
         
-        return self.getset(fmt='B', offset=0x23, value=value)
+        return self.bin.getset(fmt='B', offset=0x23, value=value)
     
     def attr__ribbons(self, value=None):
         "Hoenn and Sinnoh ribbon sets."
@@ -192,97 +189,97 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     def attr__move1(self, value=None):
         "Move #1 ID."
         
-        return self.getset(fmt='H', offset=0x28, value=value)
+        return self.bin.getset(fmt='H', offset=0x28, value=value)
     
     def attr__move2(self, value=None):
         "Move #2 ID."
         
-        return self.getset(fmt='H', offset=0x2A, value=value)
+        return self.bin.getset(fmt='H', offset=0x2A, value=value)
     
     def attr__move3(self, value=None):
         "Move #3 ID."
         
-        return self.getset(fmt='H', offset=0x2C, value=value)
+        return self.bin.getset(fmt='H', offset=0x2C, value=value)
     
     def attr__move4(self, value=None):
         "Move #4 ID."
         
-        return self.getset(fmt='H', offset=0x2E, value=value)
+        return self.bin.getset(fmt='H', offset=0x2E, value=value)
     
     def attr__move1_pp(self, value=None):
         "Current move #1 PP."
         
-        return self.getset(fmt='B', offset=0x30, value=value)
+        return self.bin.getset(fmt='B', offset=0x30, value=value)
     
     def attr__move2_pp(self, value=None):
         "Current move #2 PP."
         
-        return self.getset(fmt='B', offset=0x31, value=value)
+        return self.bin.getset(fmt='B', offset=0x31, value=value)
     
     def attr__move3_pp(self, value=None):
         "Current move #3 PP."
         
-        return self.getset(fmt='B', offset=0x32, value=value)
+        return self.bin.getset(fmt='B', offset=0x32, value=value)
     
     def attr__move4_pp(self, value=None):
         "Current move #4 PP."
         
-        return self.getset(fmt='B', offset=0x33, value=value)
+        return self.bin.getset(fmt='B', offset=0x33, value=value)
     
     def attr__move1_ppups(self, value=None):
         "Move #1 PP-Ups."
         
-        return self.getset(fmt='B', offset=0x34, value=value)
+        return self.bin.getset(fmt='B', offset=0x34, value=value)
     
     def attr__move2_ppups(self, value=None):
         "Move #2 PP-Ups."
         
-        return self.getset(fmt='B', offset=0x35, value=value)
+        return self.bin.getset(fmt='B', offset=0x35, value=value)
     
     def attr__move3_ppups(self, value=None):
         "Move #3 PP-Ups."
         
-        return self.getset(fmt='B', offset=0x36, value=value)
+        return self.bin.getset(fmt='B', offset=0x36, value=value)
     
     def attr__move4_ppups(self, value=None):
         "Move #4 PP-Ups."
         
-        return self.getset(fmt='B', offset=0x37, value=value)
+        return self.bin.getset(fmt='B', offset=0x37, value=value)
     
     def attr__hp_iv(self, value=None):
         "Hit point individual value."
 
-        return self.getset_iv(mask=0x0000001f, shift=0, value=value)
+        return self.bin.getset_iv(mask=0x0000001f, shift=0, value=value)
     
     def attr__atk_iv(self, value=None):
         "Attack individual value."
 
-        return self.getset_iv(mask=0x000003e0, shift=5, value=value)
+        return self.bin.getset_iv(mask=0x000003e0, shift=5, value=value)
     
     def attr__def_iv(self, value=None):
         "Defense individual value."
 
-        return self.getset_iv(mask=0x00007c00, shift=10, value=value)
+        return self.bin.getset_iv(mask=0x00007c00, shift=10, value=value)
     
     def attr__spe_iv(self, value=None):
         "Speed individual value."
 
-        return self.getset_iv(mask=0x000f8000, shift=15, value=value)
+        return self.bin.getset_iv(mask=0x000f8000, shift=15, value=value)
     
     def attr__spa_iv(self, value=None):
         "Special attack individual value."
 
-        return self.getset_iv(mask=0x01f00000, shift=20, value=value)
+        return self.bin.getset_iv(mask=0x01f00000, shift=20, value=value)
     
     def attr__spd_iv(self, value=None):
         "Special defense individual value."
 
-        return self.getset_iv(mask=0x3e000000, shift=25, value=value)
+        return self.bin.getset_iv(mask=0x3e000000, shift=25, value=value)
     
     def attr__is_egg(self, value=None):
         "Is egg flag."
         
-        egg_byte = self.get('L', 0x38)
+        egg_byte = self.bin.get('L', 0x38)
 
         if value is not None:
             if value == True:
@@ -290,14 +287,14 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == False:
                 new_byte = clearbit(egg_byte, 30)
             
-            return self.set('L', 0x38, new_byte)
+            return self.bin.set('L', 0x38, new_byte)
         
         return getbit(egg_byte, 30) == 1
     
     def attr__is_nicknamed(self, value=None):
         "Is nicknamed flag."
 
-        nick_byte = self.get('L', 0x38)
+        nick_byte = self.bin.get('L', 0x38)
 
         if value is not None:
             if value == True:
@@ -305,14 +302,14 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == False:
                 new_byte = clearbit(nick_byte, 31)
             
-            return self.set('L', 0x38, new_byte)
+            return self.bin.set('L', 0x38, new_byte)
                 
         return getbit(nick_byte, 31) == 1
 
     def attr__is_fateful(self, value=None):
         "Fateful encounter flag."
         
-        fate_byte = self.get('B', 0x40)
+        fate_byte = self.bin.get('B', 0x40)
 
         if value is not None:
             if value == True:
@@ -320,7 +317,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == False:
                 new_byte = clearbit(fate_byte, 0)
             
-            return self.set('B', 0x40, new_byte)
+            return self.bin.set('B', 0x40, new_byte)
         
         return getbit(fate_byte, 0) == 1
     
@@ -333,7 +330,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             0b10: 'n', # genderless
         }
 
-        gender_byte = self.get('B', 0x40)
+        gender_byte = self.bin.get('B', 0x40)
         gender_id = (gender_byte & 0x6) >> 1
 
         if value is not None:
@@ -350,7 +347,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
                 new_byte = clearbit(gender_byte, 1)
                 new_byte = setbit(new_byte, 2)
 
-            return self.set('B', 0x40, new_byte)
+            return self.bin.set('B', 0x40, new_byte)
         
         return genders[gender_id]
     
@@ -361,7 +358,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     def attr__has_leafcrown(self, value=None):
         "Leaf Crown. (HG/SS-only)"
         
-        leaf_byte = self.get('B', 0x41)
+        leaf_byte = self.bin.get('B', 0x41)
 
         if value is not None:
             if value == True:
@@ -369,44 +366,44 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == False:
                 new_byte = clearbit(leaf_byte, 5)
             
-            return self.set('B', 0x41, new_byte)
+            return self.bin.set('B', 0x41, new_byte)
         
         return getbit(leaf_byte, 5) == 1
     
     def attr__egg_location(self, value=None):
         "Location where the egg was received."
         
-        return self.getset(fmt='H', offset=0x7E, value=value)
+        return self.bin.getset(fmt='H', offset=0x7E, value=value)
     
     def attr__met_location(self, value=None):
         "Location where the Pokémon was met."
         
-        return self.getset(fmt='H', offset=0x80, value=value)
+        return self.bin.getset(fmt='H', offset=0x80, value=value)
     
     def attr__pt_egg_location(self, value=None):
         "Location where the egg was received. (Platinum-only)"
         
-        return self.getset(fmt='H', offset=0x44, value=value)
+        return self.bin.getset(fmt='H', offset=0x44, value=value)
     
     def attr__pt_met_location(self, value=None):
         "Location where the Pokémon was met. (Platinum-only)"
         
-        return self.getset(fmt='H', offset=0x44, value=value)
+        return self.bin.getset(fmt='H', offset=0x44, value=value)
     
     def attr__nickname(self, value=None):
         "Pokémon nickname."
 
-        return self.getset_string(offset=0x48, length=10, value=value)
+        return self.bin.getset_string(offset=0x48, length=10, value=value)
     
     def attr__hometown(self, value=None):
         "Pokémon hometown."
         
-        return self.getset(fmt='B', offset=0x5F, value=value)
+        return self.bin.getset(fmt='B', offset=0x5F, value=value)
     
     def attr__ot_name(self, value=None):
         "Original trainer name."
 
-        return self.getset_string(offset=0x68, length=7, value=value)
+        return self.bin.getset_string(offset=0x68, length=7, value=value)
     
     def attr__egg_date(self, value=None):
         "Date when the egg was received."
@@ -416,17 +413,17 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             if value[0] < 2000:
                 value[0] += 2000
             
-            self.set('B', 0x78, (value[0]-2000)) # year - 2000
-            self.set('B', 0x79, value[1]) # month
-            self.set('B', 0x7A, value[2]) # day
+            self.bin.set('B', 0x78, (value[0]-2000)) # year - 2000
+            self.bin.set('B', 0x79, value[1]) # month
+            self.bin.set('B', 0x7A, value[2]) # day
 
             return
         
-        date_year = self.get('B', 0x78)
+        date_year = self.bin.get('B', 0x78)
         if date_year > 0:
             date_year += 2000
-        date_month = self.get('B', 0x79)
-        date_day = self.get('B', 0x7A)
+        date_month = self.bin.get('B', 0x79)
+        date_day = self.bin.get('B', 0x7A)
 
         return (date_year, date_month, date_day)
     
@@ -438,17 +435,17 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             if value[0] < 2000:
                 value[0] += 2000
             
-            self.set('B', 0x7B, (value[0]-2000)) # year - 2000
-            self.set('B', 0x7C, value[1]) # month
-            self.set('B', 0x7D, value[2]) # day
+            self.bin.set('B', 0x7B, (value[0]-2000)) # year - 2000
+            self.bin.set('B', 0x7C, value[1]) # month
+            self.bin.set('B', 0x7D, value[2]) # day
 
             return
         
-        date_year = self.get('B', 0x7B)
+        date_year = self.bin.get('B', 0x7B)
         if date_year > 0:
             date_year += 2000
-        date_month = self.get('B', 0x7C)
-        date_day = self.get('B', 0x7D)
+        date_month = self.bin.get('B', 0x7C)
+        date_day = self.bin.get('B', 0x7D)
 
         return (date_year, date_month, date_day)
     
@@ -458,7 +455,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
         @see http://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9rus
         """
 
-        return self.getset(fmt='B', offset=0x82, value=value)
+        return self.bin.getset(fmt='B', offset=0x82, value=value)
     
     def attr__has_pokerus(self, value=None):
         "Check if a Pokémon is currently infected with Pokérus."
@@ -477,16 +474,16 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     def attr__ball(self, value=None):
         "Poké Ball ID."
         
-        return self.getset(fmt='B', offset=0x83, value=value)
+        return self.bin.getset(fmt='B', offset=0x83, value=value)
     
     def attr__met_level(self, value=None):
         "Level at which the Pokémon was met."
         
-        metlv_byte = self.get('B', 0x84)
+        metlv_byte = self.bin.get('B', 0x84)
 
         if value is not None:
             new_byte = (metlv_byte & ~0x7f) | value
-            self.set('B', 0x84, new_byte)
+            self.bin.set('B', 0x84, new_byte)
         
         return metlv_byte & 0x7f # first 7 bits
     
@@ -497,7 +494,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             0: 'm', # male
             1: 'f', # female
         }
-        gender_byte = self.get('B', 0x84)
+        gender_byte = self.bin.get('B', 0x84)
 
         if value is not None:
             if value == 'm':
@@ -505,7 +502,7 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
             elif value == 'f':
                 new_byte = setbit(gender_byte, 7)
             
-            self.set('B', 0x84, new_byte)
+            self.bin.set('B', 0x84, new_byte)
         
         gender_id = getbit(gender_byte, 7)
 
@@ -514,19 +511,19 @@ class PkmAttrMapper(AttrMapper, PkmBinaryFile):
     def attr__encounter_type(self, value=None):
         "Pokémon encounter type."
         
-        return self.getset(fmt='B', offset=0x85, value=value)
+        return self.bin.getset(fmt='B', offset=0x85, value=value)
     
     def attr__hgss_ball(self, value=None):
         "Secondary Poké Ball ID. (HG/SS-only)"
         
-        return self.getset(fmt='B', offset=0x86, value=value)
+        return self.bin.getset(fmt='B', offset=0x86, value=value)
     
     def attr__nature(self, value=None):
         "Nature. (B/W-only)"
         
-        return self.getset(fmt='B', offset=0x41, value=value)
+        return self.bin.getset(fmt='B', offset=0x41, value=value)
     
     def attr__dw_ability(self, value=None):
         "Dream World ability flag. (B/W-only)"
         
-        return self.getset(fmt='B', offset=0x42, value=value)
+        return self.bin.getset(fmt='B', offset=0x42, value=value)

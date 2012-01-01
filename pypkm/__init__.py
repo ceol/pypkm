@@ -38,11 +38,60 @@ __version__ = '0.1'
 import os
 import sqlite3
 import struct
+from pypkm.binary import PkmBinaryFile
 from pypkm.attr import PkmAttrMapper
 from pypkm.crypt import encrypt, encrypt_gts, decrypt, decrypt_gts
 
-class PkmBase(PkmAttrMapper):
+class BasePkm(object):
     "Base class for the Pkm class."
+
+    # Instance of PkmBinaryFile
+    bin = None
+
+    # Instance of PkmAttrMapper
+    attr = None
+
+    def __getattr__(self, name):
+        # Try to avoid infinite recursion by calling __getattribute__ and
+        # catching the attribute
+        try:
+            func_name = '{}{}'.format('attr__', name)
+            return object.__getattribute__(self.attr, func_name)()
+        except AttributeError:
+            # catch exception to raise a more helpful one
+            error = "'{}' object has no attribute '{}'".format(self.__class__.__name__, name)
+            raise AttributeError(error)
+    
+    def __setattr__(self, name, value):
+        try:
+            getattr(self.attr, 'attr__' + name)(value)
+        except AttributeError:
+            self.__dict__[name] = value
+    
+    def new(self, gen):
+        """Hook for creating a Pkm instance with blank data.
+
+        Keyword arguments:
+        gen (int) -- the file's game generation
+        """
+        
+        self.bin = PkmBinaryFile().new(gen=gen)
+        self.attr = PkmAttrMapper(bin_=self.bin)
+
+        return self
+    
+    def load(self, gen, path=None, data=None):
+        """Hook for loading data into a new Pkm instance.
+
+        Keyword arguments:
+        path (string) -- path to the file to load
+        data (string) -- string of byte data
+        """
+
+        self.bin = PkmBinaryFile().load(gen=gen, path=path, data=data)
+        self.attr = PkmAttrMapper(bin_=self.bin)
+
+        return self
     
     def toparty(self):
         "Add battle data to the PKM file."
@@ -112,7 +161,7 @@ class PkmBase(PkmAttrMapper):
         "Decrypt PKM data sent over the GTS."
         pass
 
-class Pkm(PkmBase):
+class Pkm(BasePkm):
     "Wrapper class for all PKM file manipulation."
     pass
 
