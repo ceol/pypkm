@@ -96,29 +96,29 @@ class BasePkm(object):
     def toparty(self):
         "Add battle data to the PKM file."
 
-        data = self.get_boxdata()
+        data = self.bin.get_boxdata()
 
         # first four bytes don't need to be set by us
         battle_data = '\x00' * 4
 
-        level = self.get_level(pokemon_id=self.id, exp=self.exp)
+        level = self.bin.get_level(pokemon_id=self.id, exp=self.exp)
         battle_data += struct.pack('<B', level)
         
         # we don't set the capsule index
         battle_data += '\x00'
 
         # the nature is used to calculate battle stats (except hp)
-        nature = self.get_nature(self.pv % 25)
+        nature = self.bin.get_nature(self.pv % 25)
 
-        base_stats = self.get_basestats(pokemon_id=self.id)
+        base_stats = self.bin.get_basestats(pokemon_id=self.id)
 
-        curhp_stat = self.calcstat(iv=self.hp_iv, ev=self.hp_ev, base=base_stats[0], level=level, nature_stat=None)
+        curhp_stat = self.bin.calcstat(iv=self.hp_iv, ev=self.hp_ev, base=base_stats[0], level=level, nature_stat=None)
         maxhp_stat = curhp_stat
-        atk_stat = self.calcstat(iv=self.atk_iv, ev=self.atk_ev, base=base_stats[1], level=level, nature_stat=nature[2])
-        def_stat = self.calcstat(iv=self.def_iv, ev=self.def_ev, base=base_stats[2], level=level, nature_stat=nature[3])
-        spe_stat = self.calcstat(iv=self.spe_iv, ev=self.spe_ev, base=base_stats[3], level=level, nature_stat=nature[4])
-        spa_stat = self.calcstat(iv=self.spa_iv, ev=self.spa_ev, base=base_stats[4], level=level, nature_stat=nature[5])
-        spd_stat = self.calcstat(iv=self.spd_iv, ev=self.spd_ev, base=base_stats[5], level=level, nature_stat=nature[6])
+        atk_stat = self.bin.calcstat(iv=self.atk_iv, ev=self.atk_ev, base=base_stats[1], level=level, nature_stat=nature[2])
+        def_stat = self.bin.calcstat(iv=self.def_iv, ev=self.def_ev, base=base_stats[2], level=level, nature_stat=nature[3])
+        spe_stat = self.bin.calcstat(iv=self.spe_iv, ev=self.spe_ev, base=base_stats[3], level=level, nature_stat=nature[4])
+        spa_stat = self.bin.calcstat(iv=self.spa_iv, ev=self.spa_ev, base=base_stats[4], level=level, nature_stat=nature[5])
+        spd_stat = self.bin.calcstat(iv=self.spd_iv, ev=self.spd_ev, base=base_stats[5], level=level, nature_stat=nature[6])
 
         battle_data += struct.pack('<HHHHHHH', curhp_stat, maxhp_stat, atk_stat, def_stat, spe_stat, spa_stat, spd_stat)
 
@@ -129,7 +129,7 @@ class BasePkm(object):
             battle_data += '\x00' * 80
         
         new_data = data + battle_data
-        self.add_data(new_data)
+        self.bin.add_data(new_data)
 
         return new_data
     
@@ -141,7 +141,7 @@ class BasePkm(object):
         "Encrypt PKM data."
         
         encrypted_data = encrypt(self.get_data())
-        self.add_data(encrypted_data)
+        self.bin.add_data(encrypted_data)
         
         return encrypted_data
     
@@ -149,7 +149,7 @@ class BasePkm(object):
         "Decrypt PKM data."
         
         decrypted_data = decrypt(self.get_boxdata())
-        self.add_data(decrypted_data)
+        self.bin.add_data(decrypted_data)
 
         return decrypted_data
     
