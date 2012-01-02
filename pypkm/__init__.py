@@ -123,9 +123,9 @@ class BasePkm(object):
         battle_data += struct.pack('<HHHHHHH', curhp_stat, maxhp_stat, atk_stat, def_stat, spe_stat, spa_stat, spd_stat)
 
         # trash data and capsule seal coords
-        if self.is_gen(5):
+        if self.bin.is_gen(5):
             battle_data += '\x00' * 64
-        elif self.is_gen(4):
+        elif self.bin.is_gen(4):
             battle_data += '\x00' * 80
         
         new_data = data + battle_data
