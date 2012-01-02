@@ -1,6 +1,27 @@
 # coding=utf-8
 
-"Encrypt and decrypt Pokémon data."
+"""Encrypt and decrypt Pokémon data.
+
+Pokémon data is encrypted using a linear congruential random number
+generator (LC RNG). The game encrypts the data when sending data over
+the GTS or when storing the Pokémon in its save file.
+
+If we break a traditional 136-byte Pokémon file up, bytes 0x00 to 0x07
+would be unencrypted, and the following 128 bytes would account for
+the data to be encrypted/decrypted.
+
+To encrypt, shuffle the blocks using the PV to calculate a shift value,
+then apply a XOR transformation to each two-byte word of the data using
+an instance of the PRNG seeded by the checksum. To decrypt, apply the
+XOR transformation and then unshuffle the blocks.
+
+If the data includes party information, a second shuffling and
+transformation is applied but with the PRNG seeded by the PV, not the
+checksum.
+
+@see http://projectpokemon.org/wiki/Pokemon_NDS_Structure
+@see http://projectpokemon.org/wiki/Pokemon_Black/White_NDS_Structure
+"""
 
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
@@ -9,10 +30,10 @@ from array import array
 from pypkm.rng import Prng, Grng
 
 def _checksum(data, size='H'):
-    """Calculate the checksum of data using the size as the word-length.
+    """Calculate the checksum of data using size as word-length.
     
-    This defaults to 'H' (a two-byte word) because it's what the Pokémon
-    games use.
+    This defaults to 'H' (a two-byte word) because it's what the
+    Pokémon games use.
     """
     
     data = array(size, data)
@@ -28,9 +49,10 @@ def _checksum(data, size='H'):
 def _unshuffle(pv, data):
     """Unshuffle PKM binary data according to a shift value.
 
-    Unshuffling data has different permuations than shuffling data. Until I
-    figure out a way to convey this pattern mathematically, I'll have to
-    resort to hardcoding the stray permutations in a dict.
+    Unshuffling data has different permuations than shuffling data.
+    Until I figure out a way to convey this pattern mathematically,
+    I'll have to resort to hardcoding the stray permutations in a
+    dict.
 
     Keyword arguments:
     pv (int) -- the Pokémon's personality value
@@ -61,14 +83,15 @@ def _unshuffle(pv, data):
 def _shuffle(pv, data, shiftval=None):
     """Shuffle the data according to a shift value derived from the PV.
     
-    Data stored in .pkm files is split into five blocks: one unencrypted
-    block the PV and checksum, and four encrypted blocks containing all other
-    information. In order to encrypt (for saving) or decrypt (for reading)
-    .pkm files, the four encrypted blocks must be shuffled based on the
-    supplied PV.
+    Data stored in .pkm files is split into five blocks: one
+    unencrypted block the PV and checksum, and four encrypted blocks
+    containing all other information. In order to encrypt (for saving)
+    or decrypt (for reading) .pkm files, the four encrypted blocks must
+    be shuffled based on the supplied PV.
     
-    The data must be a multiple of 4 or it will be padded to fit. Most of the
-    time, the supplied data will be 128 bytes (the length of Pokémon data).
+    The data must be a multiple of 4 or it will be padded to fit. Most
+    of the time, the supplied data will be 128 bytes (the length of
+    Pokémon data).
     
     The blocks are shifted in an ascending permutation.  To wit:
         00 = ABCD   01 = ABDC   02 = ACBD   03 = ACDB
@@ -78,8 +101,8 @@ def _shuffle(pv, data, shiftval=None):
         16 = CDAB   17 = CDBA   18 = DABC   19 = DACB
         20 = DBAC   21 = DBCA   22 = DCAB   23 = DCBA
     
-    Given a list [ 'A', 'B', 'C', 'D' ], we can calculate which elements
-    to pop out to yield the correct order, e.g.:
+    Given a list [ 'A', 'B', 'C', 'D' ], we can calculate which
+    elements to pop out to yield the correct order, e.g.:
         pop #1 (shiftVal / 6):
             0 = A (BCD)
             1 = B (ACD)
@@ -97,8 +120,9 @@ def _shuffle(pv, data, shiftval=None):
     
         pop #4 is always the remaining element.
      
-    The previous comment section (along with basically this entire function)
-    was stolen directly from tsanth's code because it's great.
+    The previous comment section (along with basically this entire
+    function) was stolen directly from tsanth's code because it's
+    great.
 
     Keyword arguments:
     pv (int) -- personality value

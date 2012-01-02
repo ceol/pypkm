@@ -1,6 +1,6 @@
 # coding=utf-8
 
-"Map Pkm() attributes to function calls."
+"Map PyPKM attributes to function calls."
 
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
@@ -32,8 +32,8 @@ class AttrMapper(object):
 class PkmAttrMapper(object):
     """Functions used to map attribute calls.
 
-    PkmAttrMapper relies on the child class also extending PkmBinaryFile to
-    use the get and set methods.
+    PkmAttrMapper relies on the child class also extending
+    PkmBinaryFile to use the get and set methods.
     """
 
     # Instance of PkmBinaryFile already initialized
@@ -54,8 +54,8 @@ class PkmAttrMapper(object):
     def attr__checksum(self, value=None):
         """Checksum.
         
-        This should only be edited when the byte data is changed. Use the
-        appropriate pypkm.utils function to calculate.
+        This should only be edited when the byte data is changed. Use
+        the appropriate pypkm.utils function to calculate.
         """
         
         return self.bin.getset(fmt='H', offset=0x06, value=value)

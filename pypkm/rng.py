@@ -3,8 +3,8 @@
 """Linear congruent random number generators.
 
 This is a type of pseudo-random number generator used to create
-personality values (PVs or PIDs) and individual values (IVs). It is defined
-as a recursive function in the following form:
+personality values (PVs or PIDs) and individual values (IVs). It is
+defined as a recursive function in the following form:
 
     X[n+1] = ((a * X[n]) + c) % m
 
@@ -16,10 +16,11 @@ where
 `X[n]` is the seed
 
 The product of the function is used as the seed of the next call to the
-function. In the Pokémon games, the modulus isn't used, being replaced by an
-AND mask to force the number to the last 32 (or 64) bits. The other
-modification to the function is the addition of a right shift to the created
-seed on return but not when the created seed replaces the old seed.
+function. In the Pokémon games, the modulus isn't used, being replaced
+by an AND mask to force the number to the last 32 (or 64) bits. The
+other modification to the function is the addition of a right shift to
+the created seed on return but not when the created seed replaces the
+old seed.
 """
 
 __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
@@ -27,7 +28,7 @@ __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 class Rng(object):
     """Base class for the linear congruent random number generator.
     
-    I may refer to this class as the `RNG`, the `LC RNG`, or the `LCRNG`
+    I may refer to this class as the RNG, the LC RNG, or the LCRNG
     throughout documentation. All of these mean the same thing: this
     pseudo-random number generator.
     """
@@ -37,8 +38,8 @@ class Rng(object):
     
     seed = 0
     
-    # Variables for the LC RNG. They may change depending on what child RNG
-    # class is being used.
+    # Variables for the LC RNG. They may change depending on what child
+    # RNG class is being used.
     mult = 0
     add = 0
     mask = 0xFFFFFFFF
@@ -76,9 +77,10 @@ class Rng(object):
 class Prng(Rng):
     """Widely-used extension of the base LC RNG.
     
-    This class is used in the creation of Pokémon PVs and IVs. There are
-    various ways this class is called, such as the `A-B-C-D` form, where a
-    Pokémon's PV is created from four successive calls to the PRNG.
+    This class is used in the creation of Pokémon PVs and IVs. There
+    are various ways this class is called, such as the `A-B-C-D` form,
+    where a Pokémon's PV is created from four successive calls to the
+    PRNG.
     """
     
     def __init__(self, seed=0):
@@ -91,9 +93,9 @@ class Prng(Rng):
 class Arng(Rng):
     """Rarely-used extension of the base LC RNG.
     
-    As the title says, this extension of the LC RNG is rarely used. I believe
-    it's only called when a Mystery Gift Pokémon is shiny in order to force
-    it back to normal color. Kept in for posterity.
+    As the title says, this extension of the LC RNG is rarely used. I
+    believe it's only called when a Mystery Gift Pokémon is shiny in
+    order to force it back to normal color. Kept in for posterity.
     """
     
     def __init__(self, seed=0):
@@ -124,8 +126,8 @@ class Mtrng(Rng):
     """Mersenne Twister wrapper.
     
     Under some circumstances, a Pokémon game may use a Mersenne Twister
-    pseudo-random number generator. One such circumstance is when an egg's PV
-    is created.
+    pseudo-random number generator. One such circumstance is when an
+    egg's PV is created.
     """
     
     def __init__(self, seed=0):

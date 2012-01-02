@@ -13,9 +13,9 @@ from pypkm.sqlite import get_cursor
 class BinaryFile(object):
     """Core binary editing functionality.
 
-    This class is a wrapper for generic file manipulation including getting,
-    setting, creating, and saving files. Knowledge of the file's structure
-    is required.
+    This class is a wrapper for generic file manipulation including
+    getting, setting, creating, and saving files. Knowledge of the
+    file's structure is required.
     """
 
     # Path to the loaded file.
@@ -32,9 +32,10 @@ class BinaryFile(object):
 
     # Edit history
     #
-    # Note: I might not want to implement this completely due to a possible
-    # memory issue if there are too many changes in a single session. If
-    # that's the case, then just save the last revision in here.
+    # Note: I might not want to implement this completely due to a
+    # possible memory issue if there are too many changes in a single
+    # session. If that's the case, then just save the last revision in
+    # here.
     file_history = []
 
     def get_data(self):
@@ -74,8 +75,8 @@ class BinaryFile(object):
         """Set the file's subtype.
 
         Keyword arguments:
-        subtype (string or int) -- the file's subtype; distinguish between
-            certain kinds files within the filetype
+        subtype (string or int) -- the file's subtype; distinguish
+            between certain kinds files within the filetype
         """
 
         self.file_subtype = subtype
@@ -93,7 +94,8 @@ class BinaryFile(object):
         if data is None:
             data = self.get_data()
         
-        # Assert little-endian or the system might make longs eight bytes
+        # Assert little-endian or the system might make longs eight
+        # bytes
         fmt = '<' + fmt
         size = struct.calcsize(fmt)
         unpacked = struct.unpack(fmt, data[offset:offset+size])
@@ -114,14 +116,15 @@ class BinaryFile(object):
         if data is None:
             data = self.get_data()
         
-        # Assert little-endian or the system might make longs eight bytes
+        # Assert little-endian or the system might make longs eight
+        # bytes
         fmt = '<' + fmt
         size = struct.calcsize(fmt)
         packed = struct.pack(fmt, value)
         
         # Inject our packed data (it's hacky, but seems to do the job!)
-        # strings are immutable and I don't want to unpack the entire string
-        # so this will have to do. KISS.
+        # strings are immutable and I don't want to unpack the entire
+        # string so this will have to do. KISS.
         splitleft = data[:offset]
         splitright = data[offset+size:]
         new_data = splitleft + packed + splitright
@@ -129,7 +132,7 @@ class BinaryFile(object):
         self.add_data(new_data)
     
     def getset(self, fmt, offset, value, data=None):
-        """Retrieve data if value is None; otherwise, set value in data.
+        """Retrieve data if value is None; otherwise, set value.
 
         Keyword arguments:
         fmt (string) -- a struct format string
@@ -144,7 +147,11 @@ class BinaryFile(object):
         return self.get(fmt, offset, data)
     
     def new(self, data=''):
-        "Create a new file from scratch."
+        """Create a new file from scratch.
+
+        Keyword arguments:
+        data (string) -- the binary data template
+        """
 
         self.add_data(data)
         
@@ -192,14 +199,14 @@ class BinaryFile(object):
     def save(self, path=None, data=None):
         """Save the most recent changes.
         
+        This will save changes to either a separate file in the
+        file_load_path directory or to a user-supplied path. Make sure,
+        if you're supplying a path, to give a path to the file and not
+        just the directory.
+
         Keyword arguments:
         path (string) -- the path to the file to save
         data (string) -- optional data to save
-        
-        This will save changes to either a separate file in the
-        file_load_path directory or to a user-supplied path. Make sure, if
-        you're supplying a path, to give a path to the file and not just the
-        directory.
         """
 
         if path is None:
@@ -384,7 +391,10 @@ class PkmBinaryFile(BinaryFile):
         """Common logic for getting and setting a string.
 
         Keyword arguments:
-        value (string) -- the string to set
+        offset (int) -- the byte offset (inclusive)
+        length (int) -- the length of the string (not including the
+            terminator byte)
+        value (string) -- the letters to insert
         """
 
         if value is not None:
@@ -393,7 +403,7 @@ class PkmBinaryFile(BinaryFile):
         return self.get_string(offset, length)
     
     def get_growthrate(self, pokemon_id):
-        """Retrieve the growth rate ID of a Pokémon by its National Dex ID.
+        """Retrieve the growth rate ID of a Pokémon by its Dex ID.
 
         Keyword arguments:
         pokemon_id (int) -- the national dex ID of the Pokémon
@@ -420,7 +430,8 @@ class PkmBinaryFile(BinaryFile):
 
         db = get_cursor()
 
-        # select the level that's closest to the pokemon's exp without going over
+        # select the level that's closest to the pokemon's exp without
+        # going over
         query = 'SELECT `level` FROM `levels` WHERE `growth_rate_id` = ? AND `experience` <= ? ORDER BY `experience` DESC LIMIT 1'
         level = db.execute(query, (growth_id,exp)).fetchone()[0]
 
@@ -482,18 +493,19 @@ class PkmBinaryFile(BinaryFile):
     def calcstat(self, iv, ev, base, level, nature_stat):
         """Calculate the battle stat of a Pokémon.
 
-        Note that some stats may be off by one compared to the "official"
-        PKM data. I've only found this to be true on a specific FAL2010 Mew
-        file, but it's worth mentioning. If you would like to be safe,
-        deposit the Pokémon in the Day Care and take it back out to recreate
-        the battle data.
+        Note that some stats may be off by one compared to the
+        "official" PKM data. I've only found this to be true on a
+        specific FAL2010 Mew file, but it's worth mentioning. If you
+        would like to be safe, deposit the Pokémon in the Day Care and
+        take it back out to recreate the party data.
 
         Keyword arguments:
         iv (int) -- IV stat
         ev (int) -- EV stat
         base (int) -- base stat (from lookup table)
         level (int) -- level (1-100)
-        nature_stat (float) -- the stat's nature multiplier (set to None if HP)
+        nature_stat (float) -- the stat's nature multiplier (set to
+            None if HP)
         """
 
         # if hp
@@ -511,7 +523,7 @@ class PkmBinaryFile(BinaryFile):
             return int(floor(floor(stat) * nature_stat))
     
     def get_checksumdata(self, data=None):
-        """Returns the appropriate slice for calculating the file checksum.
+        """Returns appropriate slice for calculating the file checksum.
 
         Keyword arguments:
         data (string) -- optional data to use instead of history
@@ -523,7 +535,11 @@ class PkmBinaryFile(BinaryFile):
         return data[0x08:0x88]
     
     def get_boxdata(self, data=None):
-        "Return the first 136 bytes of PKM data."
+        """Return the first 136 bytes of PKM data.
+
+        Keyword arguments:
+        data (string) -- optional data to use instead of history
+        """
 
         if data is None:
             data = self.get_data()

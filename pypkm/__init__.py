@@ -2,9 +2,9 @@
 
 """PyPKM: Easy PKM file manipulation.
 
-This utility serves as a friendly way to create, edit, encrypt, decrypt, and
-convert PKM files. Its goal is to faciliate the creation of more end-user
-tools and allow developers to work with PKM files.
+This utility serves as a friendly way to create, edit, encrypt,
+decrypt, and convert PKM files. Its goal is to faciliate the creation
+of more end-user tools and allow developers to work with PKM files.
 
 Example usage:
     >>> import pypkm
@@ -21,15 +21,15 @@ Example usage:
 For instructions on how to set a specific attribute, refer to that
 attribute's function in the Pkm class.
 
-The encryption and decryption functions (including checksum and shuffle) are
-taken from the pycrypto/crypto module created by Stephen Anthony Uy
-<tsanth@iname.com>. Somehow, somewhere I came across this module, and it's
-been an extremely valuable tool for encrypting and decrypting PKM files to
-send over the GTS.
+The encryption and decryption functions (including checksum and
+shuffle) are taken from the pycrypto/crypto module created by Stephen
+Anthony Uy <tsanth@iname.com>. Somehow, somewhere I came across this
+module, and it's been an extremely valuable tool for encrypting and
+decrypting PKM files to send over the GTS.
 
 Knowledge of the PKM file structure comes from the awesome people at
-ProjectPokemon <http://projectpokemon.org/>, both on the forums and in their
-IRC channel.
+ProjectPokemon <http://projectpokemon.org/>, both on the forums and in
+their IRC channel.
 """
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
@@ -40,7 +40,7 @@ import sqlite3
 import struct
 from pypkm.binary import PkmBinaryFile
 from pypkm.attr import PkmAttrMapper
-from pypkm.crypt import encrypt, encrypt_gts, decrypt, decrypt_gts
+from pypkm.crypto import encrypt, encrypt_gts, decrypt, decrypt_gts
 
 class BasePkm(object):
     "Base class for the Pkm class."
@@ -52,8 +52,8 @@ class BasePkm(object):
     attr = None
 
     def __getattr__(self, name):
-        # Try to avoid infinite recursion by calling __getattribute__ and
-        # catching the attribute
+        # Try to avoid infinite recursion by calling __getattribute__
+        # and catching the attribute
         try:
             func_name = '{}{}'.format('attr__', name)
             return object.__getattribute__(self.attr, func_name)()
