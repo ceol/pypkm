@@ -315,7 +315,7 @@ class PkmBinaryFile(BinaryFile):
         if self.is_gen(4):
             db = get_cursor()
 
-        string = ''
+        string = []
         term_byte = offset + (offset * 2)
 
         while True:
@@ -326,17 +326,17 @@ class PkmBinaryFile(BinaryFile):
                 break
             
             if self.is_gen(5):
-                string += unichr(ord_)
+                string.append(unichr(ord_))
             elif self.is_gen(4):
                 query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
-                string += db.execute(query, (ord_,)).fetchone()[0]
+                string.append(db.execute(query, (ord_,)).fetchone()[0])
 
             offset += 2
         
         if self.is_gen(4):
             db.close()
         
-        return string
+        return ''.join(string)
     
     def set_string(self, offset, length, value):
         """Set a string in a PKM file.
