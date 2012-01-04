@@ -39,7 +39,7 @@ import os
 import datetime
 import sqlite3
 import struct
-from pypkm.binary import PkmBinaryFile
+from pypkm.files import PkmBinaryFile
 from pypkm.newattr import load_mapper
 from pypkm.crypto import encrypt, encrypt_gts, decrypt, decrypt_gts
 
