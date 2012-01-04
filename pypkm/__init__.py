@@ -40,7 +40,7 @@ import datetime
 import sqlite3
 import struct
 from pypkm.binary import PkmBinaryFile
-from pypkm.attr import PkmAttrMapper
+from pypkm.newattr import load_mapper
 from pypkm.crypto import encrypt, encrypt_gts, decrypt, decrypt_gts
 
 class BasePkm(object):
@@ -49,15 +49,14 @@ class BasePkm(object):
     # Instance of PkmBinaryFile
     bin = None
 
-    # Instance of PkmAttrMapper
+    # Instance of attribute mapper class
     attr = None
 
     def __getattr__(self, name):
         # Try to avoid infinite recursion by calling __getattribute__
         # and catching the attribute
         try:
-            func_name = '{}{}'.format('attr__', name)
-            return object.__getattribute__(self.attr, func_name)()
+            return object.__getattribute__(self.attr, name)
         except AttributeError:
             # catch exception to raise a more helpful one
             error = "'{}' object has no attribute '{}'".format(self.__class__.__name__, name)
@@ -65,7 +64,7 @@ class BasePkm(object):
     
     def __setattr__(self, name, value):
         try:
-            getattr(self.attr, 'attr__' + name)(value)
+            setattr(self.attr, name, value)
         except AttributeError:
             self.__dict__[name] = value
     
@@ -77,7 +76,7 @@ class BasePkm(object):
         """
         
         self.bin = PkmBinaryFile().new(gen=gen)
-        self.attr = PkmAttrMapper(bin_=self.bin)
+        self.attr = load_mapper(bin_=self.bin)
 
         return self
     
@@ -90,7 +89,7 @@ class BasePkm(object):
         """
 
         self.bin = PkmBinaryFile().load(gen=gen, path=path, data=data)
-        self.attr = PkmAttrMapper(bin_=self.bin)
+        self.attr = load_mapper(bin_=self.bin)
 
         return self
     

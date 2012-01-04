@@ -1,17 +1,32 @@
+# coding=utf-8
+
 # @see http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
-def Property(func):
+def auto_property(func):
     return property(**func())
 
-def CommonProperty(func):
-    obj, fmt, offset = func()
+def getset_property(func):
+    """Return a property instance aimed at editing PKM binary data.
 
-    def fget():
-        return obj.bin.get(fmt=fmt, offset=offset)
+    Functions wishing to utilize this decorator should return a tuple
+    of the struct format and the offset byte. For example:
+
+        @getset_property
+        def my_attribute(self):
+            return ('B', 0x04)
     
-    def fset(value):
-        obj.bin.set(fmt=fmt, offset=offset, value=value)
+    my_attribute would enable editing the single byte located at 0x04.
+    """
     
-    def fdel():
-        obj.bin.set(fmt=fmt, offset=offset, value=0)
+    def fget(self):
+        fmt, offset = func(self)
+        return self.bin.get(fmt=fmt, offset=offset)
+    
+    def fset(self, value):
+        fmt, offset = func(self)
+        self.bin.set(fmt=fmt, offset=offset, value=value)
+    
+    def fdel(self):
+        fmt, offset = func(self)
+        self.bin.set(fmt=fmt, offset=offset, value=0)
     
     return property(fget, fset, fdel)
