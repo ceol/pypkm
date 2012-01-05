@@ -623,3 +623,9 @@ class PkmBinaryFile(BinaryFile):
         self.set_gen(gen)
 
         return self
+
+def load_handler(gen):
+    if gen == 5:
+        return Gen5BinaryFile()
+    elif gen == 4:
+        return Gen4BinaryFile()

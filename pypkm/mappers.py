@@ -472,5 +472,3 @@ def load_mapper(bin_):
         return Gen5AttrMapper(bin_=bin_)
     elif gen == 4:
         return Gen4AttrMapper(bin_=bin_)
-    elif gen == 3:
-        return Gen3AttrMapper(bin_=bin_)
