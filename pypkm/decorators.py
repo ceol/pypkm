@@ -1,32 +1,58 @@
 # coding=utf-8
 
-# @see http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
+"""Decorators used for wrapping attribute mapper functions.
+
+For the time being, these will not be used in favor of __getattr__()
+and __setattr__(). There's just way too much overhead to justify it.
+
+@see http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
+"""
+
+__author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
+
+import inspect
+
 def auto_property(func):
+    """Automagically return a property instance from method functions.
+
+    Methods wishing to utilize this decorator should return a locals()
+    call that itself returns getter, setter, and deleter functions. For
+    example:
+        
+        class MyClass(object):
+            ...
+            @auto_property
+            def my_attribute():
+                def fget(self):
+                    ...
+                def fset(self, value):
+                    ...
+                return locals()
+    """
     return property(**func())
 
-def getset_property(func):
-    """Return a property instance aimed at editing PKM binary data.
-
-    Functions wishing to utilize this decorator should return a tuple
-    of the struct format and the offset byte. For example:
-
-        @getset_property
-        def my_attribute(self):
-            return ('B', 0x04)
-    
-    my_attribute would enable editing the single byte located at 0x04.
-    """
+def attr_property(func):
+    """Wrap a get/set function as a property."""
     
     def fget(self):
-        fmt, offset = func(self)
-        return self.bin.get(fmt=fmt, offset=offset)
+        return func(self)
     
     def fset(self, value):
-        fmt, offset = func(self)
-        self.bin.set(fmt=fmt, offset=offset, value=value)
+        return func(self, value)
+
+    return property(fget, fset)
+
+def decorate_class(decorator):
+    """Wrap every method of a class in a decorator.
+
+    @see http://stackoverflow.com/a/2238076/374470
+    """
+
+    def dec_cls(cls):
+        for name, method in inspect.getmembers(cls, inspect.ismethod):
+            if name != '__init__':
+                setattr(cls, name, decorator(method))
+        
+        return cls
     
-    def fdel(self):
-        fmt, offset = func(self)
-        self.bin.set(fmt=fmt, offset=offset, value=0)
-    
-    return property(fget, fset, fdel)
+    return dec_cls
