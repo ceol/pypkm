@@ -9,6 +9,7 @@ import struct
 import sqlite3
 from math import floor
 from pypkm.sqlite import get_cursor
+from pypkm.utils import getbit, setbit, clearbit
 
 class BinaryFile(object):
     """Core binary editing functionality.
@@ -258,8 +259,51 @@ class PkmBinaryFile(BinaryFile):
 
         return self.get_gen() == gen
     
+    def get_bitflag(self, fmt, offset, bit):
+        """Return a boolean value stored in a bit.
+
+        Keyword arguments:
+        fmt (string) -- a struct format string
+        offset (int) -- the byte offset (inclusive)
+        bit (int) -- the bit offset (inclusive)
+        """
+
+        byte = self.get(fmt=fmt, offset=offset)
+        return bool(getbit(byte, bit))
+    
+    def set_bitflag(self, fmt, offset, bit, value):
+        """Set a boolean flag stored in a bit.
+
+        fmt (string) -- a struct format string
+        offset (int) -- the byte offset (inclusive)
+        bit (int) -- the bit offset (inclusive)
+        value (bool) -- the flag
+        """
+
+        byte = self.bin.get(fmt=fmt, offset=offset)
+        if bool(value):
+            byte = setbit(byte, bit)
+        else:
+            byte = clearbit(byte, bit)
+        self.set(fmt=fmt, offset=offset, value=byte)
+    
+    def getset_bitflag(self, fmt, offset, bit, value=None):
+        """Common logic for getting and setting a bitflag.
+
+        fmt (string) -- a struct format string
+        offset (int) -- the byte offset (inclusive)
+        bit (int) -- the bit offset (inclusive)
+        value (bool) -- (optional) the flag
+        """
+
+        if value is not None:
+            return self.set_bitflag(fmt=fmt, offset=offset, bit=bit,
+                                    value=value)
+        
+        return self.get_bitflag(fmt=fmt, offset=offset, bit=bit, value=value)
+    
     def get_iv(self, mask, shift, data=None):
-        """Returns an IV specified by the mask and shift.
+        """Return an IV specified by the mask and shift.
 
         Keyword arguments:
         mask (int) -- mask to apply to the IV word
