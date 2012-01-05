@@ -6,9 +6,12 @@ import os
 import datetime
 import sqlite3
 import struct
-from pypkm.files import PkmBinaryFile
+from pypkm.handlers import load_handler
 from pypkm.mappers import load_mapper
 from pypkm.crypto import encrypt, encrypt_gts, decrypt, decrypt_gts
+from pypkm.sqlite import (get_growthrate, get_level, get_exp, get_nature,
+                          get_basestats)
+from pypkm.utils import calcstat
 
 class BasePkm(object):
     "Base class for the Pkm class."
@@ -26,7 +29,8 @@ class BasePkm(object):
             return object.__getattribute__(self.attr, name)()
         except AttributeError:
             # catch exception to raise a more helpful one
-            error = "'{}' object has no attribute '{}'".format(self.__class__.__name__, name)
+            cls = self.__class__.__name__
+            error = "'{}' object has no attribute '{}'".format(cls, name)
             raise AttributeError(error)
     
     def __setattr__(self, name, value):
@@ -42,7 +46,7 @@ class BasePkm(object):
         gen (int) -- the file's game generation
         """
         
-        self.bin = PkmBinaryFile().new(gen=gen)
+        self.bin = load_handler(gen).new(gen=gen)
         self.attr = load_mapper(bin_=self.bin)
 
         return self
@@ -55,7 +59,7 @@ class BasePkm(object):
         data (string) -- string of byte data
         """
 
-        self.bin = PkmBinaryFile().load(gen=gen, path=path, data=data)
+        self.bin = load_handler(gen).load(path=path, data=data)
         self.attr = load_mapper(bin_=self.bin)
 
         return self
@@ -79,26 +83,34 @@ class BasePkm(object):
         # first four bytes don't need to be set by us
         party_data.append('\x00' * 4)
 
-        level = self.bin.get_level(pokemon_id=self.id, exp=self.exp)
+        level = get_level(pokemon_id=self.id, exp=self.exp)
         party_data.append(struct.pack('<B', level))
         
         # we don't set the capsule index
         party_data.append('\x00')
 
         # the nature is used to calculate battle stats (except hp)
-        nature = self.bin.get_nature(self.pv % 25)
+        nature = get_nature(self.pv % 25)
 
-        base_stats = self.bin.get_basestats(pokemon_id=self.id)
+        base_stats = get_basestats(pokemon_id=self.id)
 
-        curhp_stat = self.bin.calcstat(iv=self.hp_iv, ev=self.hp_ev, base=base_stats[0], level=level, nature_stat=None)
+        curhp_stat = calcstat(iv=self.hp_iv, ev=self.hp_ev, base=base_stats[0],
+                              level=level, nature_stat=None)
         maxhp_stat = curhp_stat
-        atk_stat = self.bin.calcstat(iv=self.atk_iv, ev=self.atk_ev, base=base_stats[1], level=level, nature_stat=nature[2])
-        def_stat = self.bin.calcstat(iv=self.def_iv, ev=self.def_ev, base=base_stats[2], level=level, nature_stat=nature[3])
-        spe_stat = self.bin.calcstat(iv=self.spe_iv, ev=self.spe_ev, base=base_stats[3], level=level, nature_stat=nature[4])
-        spa_stat = self.bin.calcstat(iv=self.spa_iv, ev=self.spa_ev, base=base_stats[4], level=level, nature_stat=nature[5])
-        spd_stat = self.bin.calcstat(iv=self.spd_iv, ev=self.spd_ev, base=base_stats[5], level=level, nature_stat=nature[6])
+        atk_stat = calcstat(iv=self.atk_iv, ev=self.atk_ev, base=base_stats[1],
+                            level=level, nature_stat=nature[2])
+        def_stat = calcstat(iv=self.def_iv, ev=self.def_ev, base=base_stats[2],
+                            level=level, nature_stat=nature[3])
+        spe_stat = calcstat(iv=self.spe_iv, ev=self.spe_ev, base=base_stats[3],
+                            level=level, nature_stat=nature[4])
+        spa_stat = calcstat(iv=self.spa_iv, ev=self.spa_ev, base=base_stats[4],
+                            level=level, nature_stat=nature[5])
+        spd_stat = calcstat(iv=self.spd_iv, ev=self.spd_ev, base=base_stats[5],
+                            level=level, nature_stat=nature[6])
 
-        party_data.append(struct.pack('<HHHHHHH', curhp_stat, maxhp_stat, atk_stat, def_stat, spe_stat, spa_stat, spd_stat))
+        party_data.append(struct.pack('<HHHHHHH', curhp_stat, maxhp_stat,
+                                      atk_stat, def_stat, spe_stat, spa_stat,
+                                      spd_stat))
 
         # trash data and capsule seal coords
         if self.bin.is_gen(5):

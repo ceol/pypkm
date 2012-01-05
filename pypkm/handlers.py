@@ -228,13 +228,10 @@ class BinaryFile(object):
         
         return self
 
-
 class PkmBinaryFile(BinaryFile):
     "Extension of the BinaryFile class for PKM files."
-
+    
     def __init__(self):
-        super(PkmBinaryFile, self).__init__()
-
         self.set_filetype('PKM')
     
     def get_gen(self):
@@ -301,6 +298,13 @@ class PkmBinaryFile(BinaryFile):
                                     value=value)
         
         return self.get_bitflag(fmt=fmt, offset=offset, bit=bit, value=value)
+
+class Gen4BinaryFile(PkmBinaryFile):
+    "Extension of the PkmBinaryFile class for Gen 4 files."
+
+    def __init__(self):
+        super(Gen4BinaryFile, self).__init__()
+        self.set_gen(4)
     
     def get_iv(self, mask, shift, data=None):
         """Return an IV specified by the mask and shift.
@@ -356,8 +360,7 @@ class PkmBinaryFile(BinaryFile):
             terminator byte)
         """
 
-        if self.is_gen(4):
-            db = get_cursor()
+        db = get_cursor()
 
         string = []
         term_byte = offset + (offset * 2)
@@ -369,16 +372,12 @@ class PkmBinaryFile(BinaryFile):
             if offset >= term_byte or ord_ == 0xFFFF:
                 break
             
-            if self.is_gen(5):
-                string.append(unichr(ord_))
-            elif self.is_gen(4):
-                query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
-                string.append(db.execute(query, (ord_,)).fetchone()[0])
+            query = 'SELECT `character` FROM `charmap` WHERE `id` = ?'
+            string.append(db.execute(query, (ord_,)).fetchone()[0])
 
             offset += 2
         
-        if self.is_gen(4):
-            db.close()
+        db.close()
         
         return ''.join(string)
     
@@ -392,8 +391,7 @@ class PkmBinaryFile(BinaryFile):
         value (string) -- the letters to insert
         """
 
-        if self.is_gen(4):
-            db = get_cursor()
+        db = get_cursor()
         
         count = 1
         term_byte = offset + (offset * 2)
@@ -403,33 +401,18 @@ class PkmBinaryFile(BinaryFile):
         while offset <= term_byte:
             if count <= len(value):
                 letter = value[count-1]
-                if self.is_gen(5):
-                    word = ord(letter.decode('utf8'))
-                elif self.is_gen(4):
-                    query = 'SELECT `id` FROM `charmap` WHERE `character` = ?'
-                    word = db.execute(query, (letter,)).fetchone()[0]
+                query = 'SELECT `id` FROM `charmap` WHERE `character` = ?'
+                word = db.execute(query, (letter,)).fetchone()[0]
             else:
-                if self.is_gen(4):
-                    # in gen 5, the bytes immediately after the last
-                    # letter are 0xFF, then everything after that is
-                    # 0x00, followed by two 0xFF at 0x5C
-                    if (count == len(value) + 1) or (offset == 0x5C):
-                        word = 0xFFFF
-                    else:
-                        word = 0x0000
-                elif self.is_gen(4):
-                    # in gen 4, everything after the last letter up to
-                    # 0x5D is 0xFF
-                    word = 0xFFFF
+                # in gen 4, everything after the last letter up to
+                # 0x5D is 0xFF
+                word = 0xFFFF
             
             self.set('H', offset, word)
             count += 1
             offset += 2
         
-        if self.is_gen(4):
-            db.close()
-        
-        return
+        db.close()
     
     def getset_string(self, offset, length, value):
         """Common logic for getting and setting a string.
@@ -445,126 +428,6 @@ class PkmBinaryFile(BinaryFile):
             return self.set_string(offset, length, value)
         
         return self.get_string(offset, length)
-    
-    def get_growthrate(self, pokemon_id):
-        """Retrieve the growth rate ID of a Pokémon by its Dex ID.
-
-        Keyword arguments:
-        pokemon_id (int) -- the national dex ID of the Pokémon
-        """
-
-        db = get_cursor()
-
-        query = 'SELECT `growth_rate_id` FROM `pokemon_growth_rates` WHERE `pokemon_id` = ?'
-        growth_id = db.execute(query, (pokemon_id,)).fetchone()[0]
-
-        db.close()
-
-        return growth_id
-    
-    def get_level(self, pokemon_id, exp):
-        """Retrieve the level of a Pokémon by their experience points.
-
-        Keyword arguments:
-        pokemon_id (int) -- the national dex ID of the Pokémon
-        exp (int) -- the experience points of the Pokémon
-        """
-        
-        growth_id = self.get_growthrate(pokemon_id)
-
-        db = get_cursor()
-
-        # select the level that's closest to the pokemon's exp without
-        # going over
-        query = 'SELECT `level` FROM `levels` WHERE `growth_rate_id` = ? AND `experience` <= ? ORDER BY `experience` DESC LIMIT 1'
-        level = db.execute(query, (growth_id,exp)).fetchone()[0]
-
-        db.close()
-
-        return level
-    
-    def get_exp(self, pokemon_id, level):
-        """Retrieve the experiance points of a Pokémon by their level.
-
-        Keyword arguments:
-        pokemon_id (int) -- the national dex ID of the Pokémon
-        level (int) -- the level of the Pokémon
-        """
-
-        growth_id = self.get_growthrate(pokemon_id)
-
-        db = get_cursor()
-
-        # select the exp using the growth ID and level
-        query = 'SELECT `experience` FROM `levels` WHERE `growth_id` = ? AND `level` = ?'
-        exp = db.execute(query, (growth_id,level)).fetchone()[0]
-
-        db.close()
-
-        return exp
-    
-    def get_nature(self, nature_id):
-        """Retrieves a set of information about a nature.
-
-        Keyword arguments:
-        nature_id (int) -- the ID of the nature (0-24)
-        """
-
-        db = get_cursor()
-
-        query = 'SELECT `id`, `name`, `atk`, `def`, `spe`, `spa`, `spd` FROM `natures` WHERE `id` = ?'
-        nature = db.execute(query, (nature_id,)).fetchone()
-
-        db.close()
-
-        return nature
-    
-    def get_basestats(self, pokemon_id, alt_form=0):
-        """Retrieve base stats for a Pokémon.
-
-        Keyword arguments:
-        pokemon_id (int) -- the national dex ID
-        alt_form (int) -- the optional alternate form
-        """
-
-        db = get_cursor()
-
-        query = 'SELECT `base_hp`, `base_atk`, `base_def`, `base_spe`, `base_spa`, `base_spd` FROM `pokemon_base_stats` WHERE `pokemon_id` = ? AND `pokemon_form_id` = ?'
-        base_stats = db.execute(query, (pokemon_id, alt_form)).fetchone()
-
-        return base_stats
-    
-    def calcstat(self, iv, ev, base, level, nature_stat):
-        """Calculate the battle stat of a Pokémon.
-
-        Note that some stats may be off by one compared to the
-        "official" PKM data. I've only found this to be true on a
-        specific FAL2010 Mew file, but it's worth mentioning. If you
-        would like to be safe, deposit the Pokémon in the Day Care and
-        take it back out to recreate the party data.
-
-        Keyword arguments:
-        iv (int) -- IV stat
-        ev (int) -- EV stat
-        base (int) -- base stat (from lookup table)
-        level (int) -- level (1-100)
-        nature_stat (float) -- the stat's nature multiplier (set to
-            None if HP)
-        """
-
-        # if hp
-        if nature_stat is None:
-            num = (iv + (2 * base) + (ev / 4.0) + 100) * level
-            denom = 100
-            stat = (num / denom) + 10
-
-            return int(floor(stat))
-        else:
-            num = (iv + (2 * base) + (ev / 4.0)) * level
-            denom = 100
-            stat = (num / denom) + 5
-
-            return int(floor(floor(stat) * nature_stat))
     
     def get_checksumdata(self, data=None):
         """Returns appropriate slice for calculating the file checksum.
@@ -598,31 +461,80 @@ class PkmBinaryFile(BinaryFile):
 
         return data[8:136]
     
-    def new(self, gen):
+    def new(self):
         """Create the PKM from scratch.
 
         Keyword arguments:
         gen (int) -- the file's game generation (supports 4 or 5)
         """
 
-        super(PkmBinaryFile, self).new(data='\x00'*136)
-        self.set_gen(gen)
+        super(Gen4BinaryFile, self).new(data='\x00'*136)
 
         return self
+
+class Gen5BinaryFile(Gen4BinaryFile):
+    "Extension of the PkmBinaryFile class for Gen 5 files."
+
+    def __init__(self):
+        super(Gen5BinaryFile, self).__init__()
+        self.set_gen(5)
     
-    def load(self, gen, path=None, data=None):
-        """Load the PKM file either by path or by data.
+    def get_string(self, offset, length):
+        """Retrieve a string from a PKM file.
 
         Keyword arguments:
-        gen (int) -- the file's game generation (supports 4 or 5)
-        path (string) -- optional path, supplied if no data
-        data (string) -- optional data, supplied if no path
+        offset (int) -- the byte offset (inclusive)
+        length (int) -- the length of the string (not including the
+            terminator byte)
         """
 
-        super(PkmBinaryFile, self).load(path=path, data=data)
-        self.set_gen(gen)
+        string = []
+        term_byte = offset + (offset * 2)
 
-        return self
+        while True:
+            ord_ = self.get('H', offset)
+            
+            # stop the loop at the terminator, wherever it may be
+            if offset >= term_byte or ord_ == 0xFFFF:
+                break
+            
+            string.append(unichr(ord_))
+
+            offset += 2
+        
+        return ''.join(string)
+    
+    def set_string(self, offset, length, value):
+        """Set a string in a PKM file.
+
+        Keyword arguments:
+        offset (int) -- the byte offset (inclusive)
+        length (int) -- the length of the string (not including the
+            terminator byte)
+        value (string) -- the letters to insert
+        """
+
+        count = 1
+        term_byte = offset + (offset * 2)
+
+        # loop over the nickname bytes, injecting the nickname then
+        # overwriting the remaining bytes
+        while offset <= term_byte:
+            if count <= len(value):
+                letter = value[count-1]
+                word = ord(letter.decode('utf8'))
+            else:
+                # in gen 5, the bytes immediately after the last
+                # letter are 0xFF, then everything after that is
+                # 0x00, followed by two 0xFF at 0x5C
+                if (count == len(value) + 1) or (offset == 0x5C):
+                    word = 0xFFFF
+                else:
+                    word = 0x0000
+            
+            self.set('H', offset, word)
+            count += 1
+            offset += 2
 
 def load_handler(gen):
     if gen == 5:
