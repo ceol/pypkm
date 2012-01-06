@@ -42,6 +42,9 @@ class BasePkm(object):
         else:
             self.__dict__[name] = value
     
+    def __repr__(self):
+        return self.bin.get_data()
+    
     def new(self, gen):
         """Hook for creating a Pkm instance with blank data.
 
