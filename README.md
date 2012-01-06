@@ -35,9 +35,6 @@ generation):
 
     # Create from scratch
     my_pkm = pypkm.new(gen=4)
-
-    # Load from a file
-    my_pkm = pypkm.load(gen=4, path='MyPokemon.pkm')
     
     # Load from data
     pkm_data = open('/path/to/MyPokemon.pkm', 'r').read()
@@ -66,18 +63,15 @@ As you can tell, you need to know the correct [index number][5] for most
 editing. A proper API reference will be made available in time. Until then,
 refer to the appropriate function's documentation in the `pypkm.attr` module.
 
-If you've edited the data, you probably want to save. If you've created the
-Pokémon from scratch or loaded directly from data and did not specify a path
-to save, you must do so now:
+If you've edited the data, you probably want to save. PyPKM does not handle
+saving data; you must save the file yourself. However, to convert an object
+into a string of byte data:
+    
+    # you can call tostring()
+    my_pkm.tostring()
 
-    my_pkm.save('/path/to/NewPokemon.pkm')
-
-If you loaded data from a file and optionally do not specify a path, PyPKM
-will create a new file in the same directory as the old to avoid overwriting
-the old data:
-
-    my_pkm.save()
-    # MyPokemon_new.pkm
+    # or you can use repr()
+    repr(my_pkm)
 
 [5]: http://bulbapedia.bulbagarden.net/wiki/Index_number
 
