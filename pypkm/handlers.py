@@ -82,7 +82,7 @@ class BinaryFile(object):
 
         self.file_subtype = subtype
     
-    def get(self, fmt, offset, data=None):
+    def get(self, fmt, offset):
         """Retrieve a specific section.
 
         Keyword arguments:
@@ -91,9 +91,7 @@ class BinaryFile(object):
         data (string) -- optional data to use instead of history
         """
 
-        # Let them supply their own file data!
-        if data is None:
-            data = self.get_data()
+        data = self.get_data()
         
         # Assert little-endian or the system might make longs eight
         # bytes
@@ -103,7 +101,7 @@ class BinaryFile(object):
 
         return unpacked[0]
     
-    def set(self, fmt, offset, value, data=None):
+    def set(self, fmt, offset, value):
         """Set a value located at offset.
         
         Keyword arguments:
@@ -113,9 +111,7 @@ class BinaryFile(object):
         data (string) -- optional data to use instead of history
         """
         
-        # Let them supply their own file data!
-        if data is None:
-            data = self.get_data()
+        data = self.get_data()
         
         # Assert little-endian or the system might make longs eight
         # bytes
@@ -132,20 +128,19 @@ class BinaryFile(object):
         
         self.add_data(new_data)
     
-    def getset(self, fmt, offset, value, data=None):
+    def getset(self, fmt, offset, value):
         """Retrieve data if value is None; otherwise, set value.
 
         Keyword arguments:
         fmt (string) -- a struct format string
         offset (int) -- the byte offset (inclusive)
         value (mixed) -- the value to inject at the specific offset
-        data (string) -- optional data to use instead of history
         """
         
         if value is not None:
-            return self.set(fmt, offset, value, data)
+            return self.set(fmt, offset, value)
         
-        return self.get(fmt, offset, data)
+        return self.get(fmt, offset)
     
     def new(self, data=''):
         """Create a new file from scratch.
@@ -197,7 +192,7 @@ class BinaryFile(object):
         
         return self
     
-    def save(self, path=None, data=None):
+    def save(self, path=None):
         """Save the most recent changes.
         
         This will save changes to either a separate file in the
@@ -207,7 +202,6 @@ class BinaryFile(object):
 
         Keyword arguments:
         path (string) -- the path to the file to save
-        data (string) -- optional data to save
         """
 
         if path is None:
@@ -220,8 +214,7 @@ class BinaryFile(object):
                 raise AttributeError('missing path attribute')
                 
         
-        if data is None:
-            data = self.get_data()
+        data = self.get_data()
         
         with open(path, 'w') as f:
             f.write(data)
@@ -306,7 +299,7 @@ class Gen4BinaryFile(PkmBinaryFile):
         super(Gen4BinaryFile, self).__init__()
         self.set_gen(4)
     
-    def get_iv(self, mask, shift, data=None):
+    def get_iv(self, mask, shift):
         """Return an IV specified by the mask and shift.
 
         Keyword arguments:
@@ -315,11 +308,11 @@ class Gen4BinaryFile(PkmBinaryFile):
         data (string) -- optional data to use instead of history
         """
 
-        iv_word = self.get(fmt='L', offset=0x38, data=data)
+        iv_word = self.get(fmt='L', offset=0x38)
 
         return (iv_word & mask) >> shift
     
-    def set_iv(self, mask, shift, value, data=None):
+    def set_iv(self, mask, shift, value):
         """Sets an IV using the mask and shift.
 
         Keyword arguments:
@@ -328,7 +321,7 @@ class Gen4BinaryFile(PkmBinaryFile):
         value (int) -- integer to inject into the word
         data (string) -- optional data to use instead of history
         """
-        iv_word = self.get(fmt='L', offset=0x38, data=data)
+        iv_word = self.get(fmt='L', offset=0x38)
         new_word = (iv_word & ~mask) | (value << shift)
 
         return self.set('L', 0x38, new_word)
@@ -429,37 +422,20 @@ class Gen4BinaryFile(PkmBinaryFile):
         
         return self.get_string(offset, length)
     
-    def get_checksumdata(self, data=None):
-        """Returns appropriate slice for calculating the file checksum.
-
-        Keyword arguments:
-        data (string) -- optional data to use instead of history
-        """
+    def get_checksumdata(self):
+        """Returns appropriate slice for calculating the file checksum."""
         
-        if data is None:
-            data = self.get_data()
-        
-        return data[0x08:0x88]
+        return self.get_data()[0x08:0x88]
     
-    def get_boxdata(self, data=None):
-        """Return the first 136 bytes of PKM data.
+    def get_boxdata(self):
+        """Return the first 136 bytes of PKM data."""
 
-        Keyword arguments:
-        data (string) -- optional data to use instead of history
-        """
-
-        if data is None:
-            data = self.get_data()
-
-        return data[:136]
+        return self.get_data()[:136]
     
-    def get_cryptdata(self, data=None):
+    def get_cryptdata(self):
         "Return the part of PKM data to be encrypted/decrypted."
 
-        if data is None:
-            data = self.get_data()
-
-        return data[8:136]
+        return self.get_data()[8:136]
     
     def new(self):
         """Create the PKM from scratch.
