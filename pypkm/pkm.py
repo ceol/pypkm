@@ -64,15 +64,14 @@ class BasePkm(object):
 
         return self
     
-    def save(self, path=None, data=None):
+    def save(self, path=None):
         """Hook for saving data.
 
         Keyword arguments:
         path (string) -- optional path to save
-        data (string) -- optional data to save
         """
 
-        return self.bin.save(path=path, data=data)
+        return self.bin.save(path=path)
     
     def toparty(self):
         "Add party data to the PKM file."
@@ -226,6 +225,12 @@ class BasePkm(object):
         self.bin.add_data(new_data)
 
         return new_data
+    
+    def gen4to5(self):
+        "Convert a generation 4 file to generation 5."
+
+        gen5_data = self.bin.togen5()
+        return Pkm().load(gen=5, data=gen5_data)
     
     def encrypt(self):
         "Encrypt PKM data."

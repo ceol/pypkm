@@ -356,7 +356,7 @@ class Gen4BinaryFile(PkmBinaryFile):
         db = get_cursor()
 
         string = []
-        term_byte = offset + (offset * 2)
+        term_byte = offset + (length * 2)
 
         while True:
             ord_ = self.get('H', offset)
@@ -387,7 +387,7 @@ class Gen4BinaryFile(PkmBinaryFile):
         db = get_cursor()
         
         count = 1
-        term_byte = offset + (offset * 2)
+        term_byte = offset + (length * 2)
 
         # loop over the nickname bytes, injecting the nickname then
         # overwriting the remaining bytes
@@ -447,6 +447,39 @@ class Gen4BinaryFile(PkmBinaryFile):
         super(Gen4BinaryFile, self).new(data='\x00'*136)
 
         return self
+    
+    def togen5(self):
+        "Convert a generation 4 file to generation 5."
+        
+        bin5 = load_handler(gen=5).load(data=self.get_boxdata())
+
+        # nickname
+        nick = self.get_string(offset=0x48, length=10); print nick
+        bin5.set_string(offset=0x48, length=10, value=nick)
+
+        # trainer name
+        otname = self.get_string(offset=0x68, length=7); print otname
+        bin5.set_string(offset=0x68, length=7, value=otname)
+
+        # nature gets its own byte in gen 5
+        nature = self.get('B', 0x00) % 25
+        bin5.set('B', 0x41, nature)
+
+        # egg location
+        if self.get('H', 0x7E) != 0:
+            bin5.set('H', 0x7E, 2) # set to Faraway Place
+        
+        # met location
+        if self.get('H', 0x80) != 0:
+            bin5.set('H', 0x7E, 2) # set to Faraway Place
+        
+        # zero out some unused values
+        bin5.set('B', 0x86, 0)
+        bin5.set('B', 0x43, 0)
+        bin5.set('H', 0x44, 0)
+        bin5.set('H', 0x46, 0)
+
+        return bin5.get_data()
 
 class Gen5BinaryFile(Gen4BinaryFile):
     "Extension of the PkmBinaryFile class for Gen 5 files."
@@ -465,7 +498,7 @@ class Gen5BinaryFile(Gen4BinaryFile):
         """
 
         string = []
-        term_byte = offset + (offset * 2)
+        term_byte = offset + (length * 2)
 
         while True:
             ord_ = self.get('H', offset)
@@ -491,7 +524,7 @@ class Gen5BinaryFile(Gen4BinaryFile):
         """
 
         count = 1
-        term_byte = offset + (offset * 2)
+        term_byte = offset + (length * 2)
 
         # loop over the nickname bytes, injecting the nickname then
         # overwriting the remaining bytes
