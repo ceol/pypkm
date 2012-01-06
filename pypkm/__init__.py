@@ -33,7 +33,7 @@ their IRC channel.
 """
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
-__version__ = '0.2'
+__version__ = '0.3'
 
 from pypkm.pkm import Pkm
 
