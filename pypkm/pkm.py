@@ -34,9 +34,12 @@ class BasePkm(object):
             raise AttributeError(error)
     
     def __setattr__(self, name, value):
-        try:
-            getattr(self.attr, name)(value)
-        except AttributeError:
+        if self.__dict__.get(name) is None:
+            try:
+                getattr(self.attr, name)(value)
+            except AttributeError, TypeError:
+                self.__dict__[name] = value
+        else:
             self.__dict__[name] = value
     
     def new(self, gen):
@@ -221,11 +224,13 @@ class BasePkm(object):
 
         return new_data
     
-    def gen4to5(self):
+    def togen5(self):
         "Convert a generation 4 file to generation 5."
 
         gen5_data = self.bin.togen5()
-        return Pkm().load(gen=5, data=gen5_data)
+        self.load(gen=5, data=gen5_data)
+
+        return gen5_data
     
     def encrypt(self):
         "Encrypt PKM data."
