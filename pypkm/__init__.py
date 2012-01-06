@@ -12,11 +12,9 @@ Example usage:
     >>> pkm.move1
     95
     >>> pkm.exp = 10000
-    >>> pkm.save()
-    gengar_new.pkm
+    >>> data = pkm.tostring() # save this somewhere
     >>> pkm.toparty()
-    >>> pkm.save('gengar_party.pkm')
-    gengar_party.pkm
+    >>> data = pkm.tostring() # save this somewhere
 
 For instructions on how to set a specific attribute, refer to that
 attribute's function in the Pkm class.
@@ -42,7 +40,7 @@ def new(gen):
     
     return Pkm().new(gen=gen)
 
-def load(gen, path=None, data=None):
+def load(gen, data):
     "Load a PKM file and return a Pkm instance."
     
-    return Pkm().load(gen=gen, path=path, data=data)
+    return Pkm().load(gen=gen, data=data)

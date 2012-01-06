@@ -51,27 +51,22 @@ class BasePkm(object):
 
         return self
     
-    def load(self, gen, path=None, data=None):
+    def load(self, gen, data):
         """Hook for loading data into a new Pkm instance.
 
         Keyword arguments:
-        path (string) -- path to the file to load
         data (string) -- string of byte data
         """
 
-        self.bin = load_handler(gen).load(path=path, data=data)
+        self.bin = load_handler(gen).load(data=data)
         self.attr = load_mapper(bin_=self.bin)
 
         return self
     
-    def save(self, path=None):
-        """Hook for saving data.
+    def tostring(self):
+        "Return a string of byte data."
 
-        Keyword arguments:
-        path (string) -- optional path to save
-        """
-
-        return self.bin.save(path=path)
+        return self.bin.get_data()
     
     def toparty(self):
         "Add party data to the PKM file."
