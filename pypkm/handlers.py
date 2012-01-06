@@ -454,11 +454,11 @@ class Gen4BinaryFile(PkmBinaryFile):
         bin5 = load_handler(gen=5).load(data=self.get_boxdata())
 
         # nickname
-        nick = self.get_string(offset=0x48, length=10); print nick
+        nick = self.get_string(offset=0x48, length=10)
         bin5.set_string(offset=0x48, length=10, value=nick)
 
         # trainer name
-        otname = self.get_string(offset=0x68, length=7); print otname
+        otname = self.get_string(offset=0x68, length=7)
         bin5.set_string(offset=0x68, length=7, value=otname)
 
         # nature gets its own byte in gen 5
