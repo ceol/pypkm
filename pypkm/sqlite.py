@@ -11,7 +11,11 @@ this_dir = os.path.dirname(os.path.abspath(__file__))
 db_conn = None
 
 def get_cursor():
-    "Return a SQLite cursor for queries."
+    """Return a SQLite cursor for queries.
+
+    Returns an old connection if one has been made before.
+    """
+    
     if db_conn:
         return db_conn.cursor()
     
