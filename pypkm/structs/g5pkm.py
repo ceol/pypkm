@@ -31,28 +31,6 @@ def Swapped(subcon):
         resizer = lambda length: length
     )
 
-def _check_gender(ctx):
-    """Return the appropriate gender.
-
-    Since 'male' is when neither bits are set, we check the others
-    first.
-    """
-    if ctx['is_female']:
-        return 'f'
-    elif ctx['is_genderless']:
-        return 'n'
-    
-    return 'm'
-
-def _check_date(ctx):
-    """Return a formatted date.
-
-    This function just adds 2000 to the year and puts everything in a
-    tuple.
-    """
-
-    return (ctx['year'] + 2000, ctx['month'], ctx['day'])
-
 _block0 = Struct('_block0',
     ULInt32('pv'),
     Padding(2),
@@ -211,7 +189,7 @@ _blockB = Struct('_blockB',
 )
 
 _blockC = Struct('_blockC',
-    StrictRepeater(11, ULInt16('nickname')),
+    StrictRepeater(11, ULInt16('nickname')), # needs additional logic
     Padding(1),
     ULInt8('hometown'),
     BitStruct('sinnoh_ribbons_set31',
@@ -245,7 +223,7 @@ _blockC = Struct('_blockC',
 )
 
 _blockD = Struct('_blockD',
-    StrictRepeater(8, ULInt16('ot_name')),
+    StrictRepeater(8, ULInt16('ot_name')), # needs additional logic
     Struct('egg_date',
         ULInt8('year'), # minus 2000
         ULInt8('month'),
