@@ -269,7 +269,8 @@ _blockE = Struct('_blockE',
         Flag('paralyzed'),
         Flag('toxic'),
     ),
-    Padding(3),
+    Byte('x89'),
+    Padding(2),
     ULInt8('level'),
     ULInt8('capsule_index'),
     Struct('stats',
@@ -281,7 +282,8 @@ _blockE = Struct('_blockE',
         ULInt16('spa'),
         ULInt16('spd'),
     ),
-    Padding(64),
+    Bytes('trash_data', 56),
+    Padding(8)
 )
 
 pkm_struct = Struct(
