@@ -15,7 +15,7 @@ def get_cursor():
     
     return conn.cursor()
 
-def get_growthrate(self, pokemon_id):
+def get_growthrate(pokemon_id):
     """Retrieve the growth rate ID of a Pokémon by its Dex ID.
 
     Keyword arguments:
@@ -31,7 +31,7 @@ def get_growthrate(self, pokemon_id):
 
     return growth_id
 
-def get_level(self, pokemon_id, exp):
+def get_level(pokemon_id, exp):
     """Retrieve the level of a Pokémon by their experience points.
 
     Keyword arguments:
@@ -52,7 +52,7 @@ def get_level(self, pokemon_id, exp):
 
     return level
 
-def get_exp(self, pokemon_id, level):
+def get_exp(pokemon_id, level):
     """Retrieve the experiance points of a Pokémon by their level.
 
     Keyword arguments:
@@ -72,7 +72,7 @@ def get_exp(self, pokemon_id, level):
 
     return exp
 
-def get_nature(self, nature_id):
+def get_nature(nature_id):
     """Retrieves a set of information about a nature.
 
     Keyword arguments:
@@ -88,7 +88,7 @@ def get_nature(self, nature_id):
 
     return nature
 
-def get_basestats(self, pokemon_id, alt_form=0):
+def get_basestats(pokemon_id, alt_form=0):
     """Retrieve base stats for a Pokémon.
 
     Keyword arguments:
