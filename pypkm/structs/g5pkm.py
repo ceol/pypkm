@@ -21,6 +21,22 @@ __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 # I hate doing this, but apparently it's Construct convention
 from construct import *
 from pypkm.util import Swapped
+from pypkm.sqlite import get_chr, get_ord
+
+class PkmStringAdapter(Adapter):
+    def _encode(self, obj, ctx):
+        s = []
+        for chr_ in obj:
+            s.append(ord(chr_))
+        
+        return s
+    
+    def _decode(self, obj, ctx):
+        s = []
+        for ord_ in obj:
+            s.append(unichr(ord_))
+        
+        return ''.join(s)
 
 _block0 = Struct('_block0',
     ULInt32('pv'),
@@ -180,7 +196,7 @@ _blockB = Struct('_blockB',
 )
 
 _blockC = Struct('_blockC',
-    StrictRepeater(11, ULInt16('nickname')), # needs additional logic
+    StrictRepeater(11, ULInt16('nickname')),
     Padding(1),
     ULInt8('hometown'),
     BitStruct('sinnoh_ribbons_set31',
