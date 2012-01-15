@@ -241,7 +241,8 @@ _blockD = Struct('_blockD',
         BitField('met_level', 7),
     ),
     ULInt8('encounter_type'),
-    Padding(2),
+    ULInt8('hgss_ball'),
+    Padding(1),
 )
 
 # Battle data
