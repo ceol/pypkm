@@ -18,7 +18,7 @@ __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 from construct import *
 from pypkm.util import Swapped
 
-class NicknameAdapter(Adapter):
+class PkmStringAdapter(Adapter):
     def _encode(self, obj, ctx):
         """Converts a unicode string to a list of ords."""
         
@@ -30,12 +30,12 @@ class NicknameAdapter(Adapter):
                 break
             ordlist.append(ord_)
 
-        if len(ordlist) < 11:
+        if len(ordlist) < self.bytes:
             ordlist.append(0xFFFF)
-            while len(ordlist) < 10:
+            while len(ordlist) < (self.bytes - 1):
                 ordlist.append(0x0000)
         
-        ordlist = ordlist[:10]
+        ordlist = ordlist[:(self.bytes - 1)]
         ordlist.append(0xFFFF)
 
         return ordlist
@@ -52,39 +52,11 @@ class NicknameAdapter(Adapter):
         
         return ''.join(chrlist)
 
-class OTNameAdapter(Adapter):
-    def _encode(self, obj, ctx):
-        """Converts a unicode string to a list of ords."""
-        
-        ordlist = []
+class NicknameAdapter(PkmStringAdapter):
+    bytes = 11
 
-        for chr_ in obj:
-            ord_ = ord(chr_)
-            if ord_ == 0xFFFF:
-                break
-            ordlist.append(ord_)
-
-        if len(ordlist) < 8:
-            ordlist.append(0xFFFF)
-            while len(ordlist) < 7:
-                ordlist.append(0x0000)
-        
-        ordlist = ordlist[:7]
-        ordlist.append(0xFFFF)
-
-        return ordlist
-    
-    def _decode(self, obj, ctx):
-        """Converts a list of ords to a unicode string."""
-
-        chrlist = []
-
-        for ord_ in obj:
-            if ord_ == 0xFFFF:
-                break
-            chrlist.append(unichr(ord_))
-        
-        return ''.join(chrlist)
+class OTNameAdapter(PkmStringAdapter):
+    bytes = 8
 
 _block0 = Struct('_block0',
     ULInt32('pv'),
