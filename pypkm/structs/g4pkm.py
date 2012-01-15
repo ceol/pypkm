@@ -181,7 +181,7 @@ _blockB = Struct('_blockB',
         Flag('leaf_b'),
         Flag('leaf_a'),
     ),
-    Padding(1),
+    Padding(2),
     ULInt16('egg_location_pt'),
     ULInt16('met_location_pt'),
 )
