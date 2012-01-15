@@ -9,11 +9,7 @@ Note about BitStructs: it appears Construct has some odd formatting, so
 the bit order is reversed when declaring BitStructs. This should be
 noticeable for ribbons.
 
-Note about nickname and ot_name: even though they're encoded as Unicode
-this generation, we still have to do some additional logic because
-Construct (understandably) doesn't handle Game Freak's insane string
-formatting. I may want to use the Const construct for the term byte,
-but as of right now I'd rather keep that logic separate.
+@see http://projectpokemon.org/wiki/Pokemon_Black/White_NDS_Structure
 """
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
@@ -21,22 +17,74 @@ __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 # I hate doing this, but apparently it's Construct convention
 from construct import *
 from pypkm.util import Swapped
-from pypkm.sqlite import get_chr, get_ord
 
-class PkmStringAdapter(Adapter):
+class NicknameAdapter(Adapter):
     def _encode(self, obj, ctx):
-        s = []
-        for chr_ in obj:
-            s.append(ord(chr_))
+        """Converts a unicode string to a list of ords."""
         
-        return s
+        ordlist = []
+
+        for chr_ in obj:
+            ord_ = ord(chr_)
+            if ord_ == 0xFFFF:
+                break
+            ordlist.append(ord_)
+
+        if len(ordlist) < 11:
+            ordlist.append(0xFFFF)
+            while len(ordlist) < 10:
+                ordlist.append(0x0000)
+        
+        ordlist = ordlist[:10]
+        ordlist.append(0xFFFF)
+
+        return ordlist
     
     def _decode(self, obj, ctx):
-        s = []
+        """Converts a list of ords to a unicode string."""
+
+        chrlist = []
+
         for ord_ in obj:
-            s.append(unichr(ord_))
+            if ord_ == 0xFFFF:
+                break
+            chrlist.append(unichr(ord_))
         
-        return ''.join(s)
+        return ''.join(chrlist)
+
+class OTNameAdapter(Adapter):
+    def _encode(self, obj, ctx):
+        """Converts a unicode string to a list of ords."""
+        
+        ordlist = []
+
+        for chr_ in obj:
+            ord_ = ord(chr_)
+            if ord_ == 0xFFFF:
+                break
+            ordlist.append(ord_)
+
+        if len(ordlist) < 8:
+            ordlist.append(0xFFFF)
+            while len(ordlist) < 7:
+                ordlist.append(0x0000)
+        
+        ordlist = ordlist[:7]
+        ordlist.append(0xFFFF)
+
+        return ordlist
+    
+    def _decode(self, obj, ctx):
+        """Converts a list of ords to a unicode string."""
+
+        chrlist = []
+
+        for ord_ in obj:
+            if ord_ == 0xFFFF:
+                break
+            chrlist.append(unichr(ord_))
+        
+        return ''.join(chrlist)
 
 _block0 = Struct('_block0',
     ULInt32('pv'),
@@ -196,7 +244,7 @@ _blockB = Struct('_blockB',
 )
 
 _blockC = Struct('_blockC',
-    StrictRepeater(11, ULInt16('nickname')),
+    NicknameAdapter(StrictRepeater(11, ULInt16('nickname'))),
     Padding(1),
     ULInt8('hometown'),
     BitStruct('sinnoh_ribbons_set31',
@@ -230,7 +278,7 @@ _blockC = Struct('_blockC',
 )
 
 _blockD = Struct('_blockD',
-    StrictRepeater(8, ULInt16('ot_name')), # needs additional logic
+    OTNameAdapter(StrictRepeater(8, ULInt16('ot_name'))),
     Struct('egg_date',
         ULInt8('year'), # minus 2000
         ULInt8('month'),
