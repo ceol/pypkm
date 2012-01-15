@@ -16,10 +16,11 @@ def get_cursor():
     Returns an old connection if one has been made before.
     """
     
-    if db_conn:
+    global db_conn
+    
+    if db_conn is not None:
         return db_conn.cursor()
     
-    global db_conn
     db_conn = sqlite3.connect(os.path.join(this_dir, 'data/pypkm.sqlite'))
     
     return get_cursor()
