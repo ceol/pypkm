@@ -35,11 +35,12 @@ def get_chr(ord_):
     db = get_cursor()
 
     query = 'SELECT `character` FROM `character_table` WHERE `id` = ? LIMIT 1'
-    chr_ = db.execute(query, (ord_,)).fetchone()[0]
+    row = db.execute(query, (ord_,)).fetchone()
 
     db.close()
 
-    return chr_
+    if row is not None:
+        return row[0]
 
 def get_ord(chr_):
     """Retrieve an ordinal from the gen 4 character table.
@@ -51,11 +52,12 @@ def get_ord(chr_):
     db = get_cursor()
 
     query = 'SELECT `id` FROM `character_table` WHERE `character` = ? LIMIT 1'
-    ord_ = db.execute(query, (chr_,)).fetchone()[0]
+    row = db.execute(query, (chr_,)).fetchone()
 
     db.close()
 
-    return ord_
+    if row is not None:
+        return row[0]
 
 def get_growthrate(pokemon_id):
     """Retrieve the growth rate ID of a Pokémon by its Dex ID.
