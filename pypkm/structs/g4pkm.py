@@ -18,16 +18,7 @@ __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 
 # I hate doing this, but apparently it's Construct convention
 from construct import *
-
-# http://construct.wikispaces.com/bitfields
-# used for IVs since they span two bytes
-def Swapped(subcon):
-    """swaps the bytes of the stream, prior to parsing"""
-    return Buffered(subcon,
-        encoder = lambda buf: buf[::-1],
-        decoder = lambda buf: buf[::-1],
-        resizer = lambda length: length
-    )
+from pypkm.util import Swapped
 
 _block0 = Struct('_block0',
     ULInt32('pv'),
