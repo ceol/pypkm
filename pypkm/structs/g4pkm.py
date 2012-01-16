@@ -19,6 +19,49 @@ __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 # I hate doing this, but apparently it's Construct convention
 from construct import *
 from pypkm.util import Swapped
+from pypkm.sqlite import get_chr, get_ord
+
+class PkmStringAdapter(Adapter):
+    def _encode(self, obj, ctx):
+        """Converts a unicode string to a list of Gen 4 ords."""
+
+        # enforce unicode
+        if not isinstance(obj, unicode):
+            obj = obj.decode('utf8')
+
+        ordlist = []
+
+        for chr_ in obj:
+            ord_ = get_ord(chr_)
+            if ord_ == 0xFFFF:
+                break
+            ordlist.append(ord_)
+        
+        while len(ordlist) < (self.bytes - 1):
+            ordlist.append(0xFFFF)
+        
+        ordlist = ordlist[:(self.bytes - 1)]
+        ordlist.append(0xFFFF) # enforce term byte
+
+        return ordlist
+    
+    def _decode(self, obj, ctx):
+        """Converts a list of Gen 4 ords to a unicode string."""
+
+        chrlist = []
+
+        for ord_ in obj:
+            if ord_ == 0xFFFF:
+                break
+            chrlist.append(get_chr(ord_))
+        
+        return ''.join(chrlist)
+
+class NicknameAdapter(PkmStringAdapter):
+    bytes = 11
+
+class OTNameAdapter(PkmStringAdapter):
+    bytes = 8
 
 _block0 = Struct('_block0',
     ULInt32('pv'),
@@ -187,7 +230,7 @@ _blockB = Struct('_blockB',
 )
 
 _blockC = Struct('_blockC',
-    StrictRepeater(11, ULInt16('nickname')), # needs additional logic
+    NicknameAdapter(StrictRepeater(11, ULInt16('nickname'))),
     Padding(1),
     ULInt8('hometown'),
     BitStruct('sinnoh_ribbons_set31',
@@ -221,7 +264,7 @@ _blockC = Struct('_blockC',
 )
 
 _blockD = Struct('_blockD',
-    StrictRepeater(8, ULInt16('ot_name')), # needs additional logic
+    OTNameAdapter(StrictRepeater(8, ULInt16('ot_name'))),
     Struct('egg_date',
         ULInt8('year'), # minus 2000
         ULInt8('month'),

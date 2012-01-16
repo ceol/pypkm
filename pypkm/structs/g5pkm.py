@@ -21,6 +21,10 @@ from pypkm.util import Swapped
 class PkmStringAdapter(Adapter):
     def _encode(self, obj, ctx):
         """Converts a unicode string to a list of ords."""
+
+        # enforce unicode
+        if not isinstance(obj, unicode):
+            obj = obj.decode('utf8')
         
         ordlist = []
 
@@ -36,7 +40,7 @@ class PkmStringAdapter(Adapter):
                 ordlist.append(0x0000)
         
         ordlist = ordlist[:(self.bytes - 1)]
-        ordlist.append(0xFFFF)
+        ordlist.append(0xFFFF) # enforce term byte
 
         return ordlist
     
