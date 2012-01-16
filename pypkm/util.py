@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from construct import Buffered
 
 # http://construct.wikispaces.com/bitfields
