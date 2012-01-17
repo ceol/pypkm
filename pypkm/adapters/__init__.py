@@ -2,6 +2,8 @@
 
 """General Purpose Adapters"""
 
+from construct import Adapter
+
 class DateAdapter(Adapter):
     def _encode(self, obj, ctx):
         """Converts a 3-item tuple into date byte data."""
