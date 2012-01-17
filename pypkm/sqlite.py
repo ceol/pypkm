@@ -8,12 +8,56 @@ import os
 import sqlite3
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
+db_conn = None
 
 def get_cursor():
-    "Return a SQLite cursor for queries."
-    conn = sqlite3.connect(os.path.join(this_dir, 'pypkm.sqlite'))
+    """Return a SQLite cursor for queries.
+
+    Returns an old connection if one has been made before.
+    """
     
-    return conn.cursor()
+    global db_conn
+    
+    if db_conn is not None:
+        return db_conn.cursor()
+    
+    db_conn = sqlite3.connect(os.path.join(this_dir, 'data/pypkm.sqlite'))
+    
+    return get_cursor()
+
+def get_chr(ord_):
+    """Retrieve a character from the gen 4 character table.
+
+    Keyword arguments:
+    ord_ (int) -- the character's index
+    """
+
+    db = get_cursor()
+
+    query = 'SELECT `character` FROM `character_table` WHERE `id` = ? LIMIT 1'
+    row = db.execute(query, (ord_,)).fetchone()
+
+    db.close()
+
+    if row is not None:
+        return row[0]
+
+def get_ord(chr_):
+    """Retrieve an ordinal from the gen 4 character table.
+
+    Keyword arguments:
+    chr_ (str) -- the ordinal's character
+    """
+
+    db = get_cursor()
+
+    query = 'SELECT `id` FROM `character_table` WHERE `character` = ? LIMIT 1'
+    row = db.execute(query, (chr_,)).fetchone()
+
+    db.close()
+
+    if row is not None:
+        return row[0]
 
 def get_growthrate(pokemon_id):
     """Retrieve the growth rate ID of a Pokémon by its Dex ID.

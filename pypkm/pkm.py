@@ -1,264 +1,161 @@
 # coding=utf-8
 
-__author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
+"""Retrieve Pokémon information from a PKM file.
 
-import os
-import datetime
-import sqlite3
-import struct
-from pypkm.handlers import load_handler
-from pypkm.mappers import load_mapper
-from pypkm.crypto import encrypt, encrypt_gts, decrypt, decrypt_gts
-from pypkm.sqlite import (get_growthrate, get_level, get_exp, get_nature,
-                          get_basestats)
-from pypkm.utils import calcstat
+
+"""
+
+__author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
+
+from pypkm.structs import g4pkm, g5pkm
+from pypkm.crypto import encrypt, decrypt
+from pypkm.sqlite import get_level, get_nature, get_basestats
+from pypkm.util import calcstat
 
 class BasePkm(object):
-    "Base class for the Pkm class."
 
-    # Instance of PkmBinaryFile
-    bin = None
+    # Constructor Struct object
+    _strc = None
 
-    # Instance of attribute mapper class
-    attr = None
+    # Construct Container object
+    _ctnr = None
 
-    def __getattr__(self, name):
-        # Try to avoid infinite recursion by calling __getattribute__
-        # and catching the attribute
-        try:
-            return object.__getattribute__(self.attr, name)()
-        except AttributeError:
-            # catch exception to raise a more helpful one
-            cls = self.__class__.__name__
-            error = "'{}' object has no attribute '{}'".format(cls, name)
-            raise AttributeError(error)
+    def __getattr__(self, attr):
+        return getattr(self._ctnr, attr)
     
-    def __setattr__(self, name, value):
-        if self.__dict__.get(name) is None:
-            try:
-                getattr(self.attr, name)(value)
-            except AttributeError, TypeError:
-                self.__dict__[name] = value
+    def __setattr__(self, attr, value):
+        if hasattr(self._ctnr, attr):
+            setattr(self._ctnr, attr, value)
         else:
-            self.__dict__[name] = value
+            self.__dict__[attr] = value
     
-    def __repr__(self):
-        return self.bin.get_data()
-    
-    def new(self, gen):
-        """Hook for creating a Pkm instance with blank data.
-
-        Keyword arguments:
-        gen (int) -- the file's game generation
-        """
-        
-        self.bin = load_handler(gen).new(gen=gen)
-        self.attr = load_mapper(bin_=self.bin)
-
-        return self
-    
-    def load(self, gen, data):
-        """Hook for loading data into a new Pkm instance.
-
-        Keyword arguments:
-        data (string) -- string of byte data
-        """
-
-        self.bin = load_handler(gen).load(data=data)
-        self.attr = load_mapper(bin_=self.bin)
-
-        return self
+    def _load(self, strc, data):
+        self._strc = strc
+        self._ctnr = self._strc.parse(data)
     
     def tostring(self):
-        "Return a string of byte data."
+        return self._strc.build(self._ctnr)
 
-        return self.bin.get_data()
+class Gen4Pkm(BasePkm):
+
+    def __init__(self, data=None):
+        if data is None:
+            data = '\x00' * 136
+        
+        if len(data) == 136:
+            strc = g4pkm.pkm_struct
+        elif len(data) == 236:
+            strc = g4pkm.pkm_party_struct
+        else:
+            raise ValueError('Unsupported PKM file length: expected 136 or 236, received {}'.format(len(data)))
+        
+        self._load(strc, data)
     
     def toparty(self):
-        "Add party data to the PKM file."
+        # even if it's already a party file, we should process it
+        data = self.tostring()[:136]
+        # create empty data to load into Struct
+        data = ''.join([data, '\x00' * 100])
+        new_pkm = Gen4Pkm(data)
 
-        data = self.bin.get_boxdata()
-        party_data = []
+        new_pkm.level = get_level(pokemon_id=new_pkm.id, exp=new_pkm.exp)
 
-        # first four bytes don't need to be set by us
-        party_data.append('\x00' * 4)
+        nature = get_nature(new_pkm.pv % 25)
+        base_stats = get_basestats(pokemon_id=new_pkm.id)
 
-        level = get_level(pokemon_id=self.id, exp=self.exp)
-        party_data.append(struct.pack('<B', level))
+        new_pkm.stats.current_hp = calcstat(iv=new_pkm.ivs.hp, ev=new_pkm.evs.hp, base=base_stats[0],
+                              level=new_pkm.level, nature_stat=None)
+        new_pkm.stats.max_hp = new_pkm.stats.current_hp
+        new_pkm.stats.attack = calcstat(iv=new_pkm.ivs.attack, ev=new_pkm.evs.attack, base=base_stats[1],
+                            level=new_pkm.level, nature_stat=nature[2])
+        new_pkm.stats.defense = calcstat(iv=new_pkm.ivs.defense, ev=new_pkm.evs.defense, base=base_stats[2],
+                            level=new_pkm.level, nature_stat=nature[3])
+        new_pkm.stats.speed = calcstat(iv=new_pkm.ivs.speed, ev=new_pkm.evs.speed, base=base_stats[3],
+                            level=new_pkm.level, nature_stat=nature[4])
+        new_pkm.stats.spattack = calcstat(iv=new_pkm.ivs.spattack, ev=new_pkm.evs.spattack, base=base_stats[4],
+                            level=new_pkm.level, nature_stat=nature[5])
+        new_pkm.stats.spdefense = calcstat(iv=new_pkm.ivs.spdefense, ev=new_pkm.evs.spdefense, base=base_stats[5],
+                            level=new_pkm.level, nature_stat=nature[6])
         
-        # we don't set the capsule index
-        party_data.append('\x00')
+        return new_pkm
 
-        # the nature is used to calculate battle stats (except hp)
-        nature = get_nature(self.pv % 25)
+    def togts(self):
+        pass
 
-        base_stats = get_basestats(pokemon_id=self.id)
+    def togen5(self):
+        data = self.tostring()
+        if len(data) == 236:
+            # shave off the unused data if it's a party file. we don't
+            # need to for pc files because they're the same size
+            # between gens
+            data = data[:220]
+        new_pkm = Gen5Pkm(data)
 
-        curhp_stat = calcstat(iv=self.hp_iv, ev=self.hp_ev, base=base_stats[0],
-                              level=level, nature_stat=None)
-        maxhp_stat = curhp_stat
-        atk_stat = calcstat(iv=self.atk_iv, ev=self.atk_ev, base=base_stats[1],
-                            level=level, nature_stat=nature[2])
-        def_stat = calcstat(iv=self.def_iv, ev=self.def_ev, base=base_stats[2],
-                            level=level, nature_stat=nature[3])
-        spe_stat = calcstat(iv=self.spe_iv, ev=self.spe_ev, base=base_stats[3],
-                            level=level, nature_stat=nature[4])
-        spa_stat = calcstat(iv=self.spa_iv, ev=self.spa_ev, base=base_stats[4],
-                            level=level, nature_stat=nature[5])
-        spd_stat = calcstat(iv=self.spd_iv, ev=self.spd_ev, base=base_stats[5],
-                            level=level, nature_stat=nature[6])
+        # nature gets its own byte in gen 5
+        new_pkm.nature = new_pkm.pv % 25
 
-        party_data.append(struct.pack('<HHHHHHH', curhp_stat, maxhp_stat,
-                                      atk_stat, def_stat, spe_stat, spa_stat,
-                                      spd_stat))
+        # the stringadapters automatically return unicode, and gen 5's
+        # string encoding is unicode, so leverage the work we've
+        # already done
+        new_pkm.nickname = self.nickname
+        new_pkm.ot_name = self.ot_name
 
-        # trash data and capsule seal coords
-        if self.bin.is_gen(5):
-            party_data.append('\x00' * 64)
-        elif self.bin.is_gen(4):
-            party_data.append('\x00' * 80)
+        # set locations to faraway place; there's only one location set
+        # at a time (either the pkm was met in the wild or received as
+        # an egg)
+        if new_pkm.egg_location != 0:
+            new_pkm.egg_location = 2
+        if new_pkm.met_location != 0:
+            new_pkm.met_location = 2
         
-        new_data = [
-            data,
-            ''.join(party_data),
-        ]
-        new_data = ''.join(new_data)
-        self.bin.add_data(new_data)
+        # these location bytes aren't used anymore
+        new_pkm.egg_location_pt = 0
+        new_pkm.met_location_pt = 0
 
-        return new_data
+        return new_pkm
+
+class Gen5Pkm(BasePkm):
+    
+    def __init__(self, data=None):
+        if data is None:
+            data = '\x00' * 136
+        
+        if len(data) == 136:
+            strc = g5pkm.pkm_struct
+        elif len(data) == 220:
+            strc = g5pkm.pkm_party_struct
+        else:
+            raise ValueError('Unsupported PKM file length: expected 136 or 220, received {}'.format(len(data)))
+        
+        self._load(strc, data)
+    
+    def toparty(self):
+        # even if it's already a party file, we should process it
+        data = self.tostring()[:136]
+        # create empty data to load into Struct
+        data = ''.join([data, '\x00' * 84])
+        new_pkm = Gen5Pkm(data)
+
+        new_pkm.level = get_level(pokemon_id=new_pkm.id, exp=new_pkm.exp)
+
+        nature = get_nature(new_pkm.pv % 25)
+        base_stats = get_basestats(pokemon_id=new_pkm.id)
+
+        new_pkm.stats.current_hp = calcstat(iv=new_pkm.ivs.hp, ev=new_pkm.evs.hp, base=base_stats[0],
+                              level=new_pkm.level, nature_stat=None)
+        new_pkm.stats.max_hp = new_pkm.stats.current_hp
+        new_pkm.stats.attack = calcstat(iv=new_pkm.ivs.attack, ev=new_pkm.evs.attack, base=base_stats[1],
+                            level=new_pkm.level, nature_stat=nature[2])
+        new_pkm.stats.defense = calcstat(iv=new_pkm.ivs.defense, ev=new_pkm.evs.defense, base=base_stats[2],
+                            level=new_pkm.level, nature_stat=nature[3])
+        new_pkm.stats.speed = calcstat(iv=new_pkm.ivs.speed, ev=new_pkm.evs.speed, base=base_stats[3],
+                            level=new_pkm.level, nature_stat=nature[4])
+        new_pkm.stats.spattack = calcstat(iv=new_pkm.ivs.spattack, ev=new_pkm.evs.spattack, base=base_stats[4],
+                            level=new_pkm.level, nature_stat=nature[5])
+        new_pkm.stats.spdefense = calcstat(iv=new_pkm.ivs.spdefense, ev=new_pkm.evs.spdefense, base=base_stats[5],
+                            level=new_pkm.level, nature_stat=nature[6])
+        
+        return new_pkm
     
     def togts(self):
-        "Create PKM data to be sent from a fake GTS."
-        
-        data = self.bin.get_data()
-        if len(data) != 136:
-            data = self.toparty()
-        
-        def _gender(val):
-            if val == 'm': # male
-                return '\x01'
-            elif val == 'f': # female
-                return '\x02'
-            elif val == 'n': # either/neither
-                return '\x03'
-        
-        def _req_data():
-            _data = [
-                '\x01\x00', # requested dex ID (#001)
-                '\x03', # requested gender (either/neither)
-                '\x00', # requested min level (any)
-                '\x00', # requested max level (any)
-                '\x00', # unknown
-                '\x01', # sending trainer's gender (female)
-                '\x00', # unknown
-            ]
-
-            return ''.join(_data)
-        
-        def _timestamp():
-            now = datetime.datetime.now()
-
-            _data = [
-                struct.pack('<H', now.year), # deposited year
-                struct.pack('<B', now.month), # deposited month
-                struct.pack('<B', now.day), # deposited day
-                struct.pack('<B', now.hour), # deposited hour
-                struct.pack('<B', now.minute), # deposited minute
-                struct.pack('<B', now.second), # deposited second
-                '\x00', # unknown
-            ]
-
-            return ''.join(_data)
-        
-        def _user_data():
-            _data = [
-                '\xDB', # country
-                '\x02', # city
-                '\x08', # trainer sprite (lass)
-                '\x01', # is exchanged flag
-                '\x08', # game version (soulsilver)
-                data[0x17], # language
-            ]
-
-            return ''.join(_data)
-        
-        def _common():
-            "Commonly-set GTS data."
-
-            _data = [
-                data[0x08:0x0A], # dex ID
-                _gender(self.gender), # gender
-                data[0x8C], # level
-                _req_data(), # requested pokémon data            
-                _timestamp(), # date deposited
-                _timestamp(), # date traded (?)
-                data[0x00:0x04], # pv
-            ]
-
-            return ''.join(_data)
-        
-        # it's easier to grab the raw bin data. don't hate me!
-        if self.bin.is_gen(5):
-            gts_data = [
-                '\x00' * 16, # unused
-                _common(), # common data
-                data[0x0c:0x0e], # ot ID
-                data[0x0e:0x10], # ot secret ID
-                data[0x68:0x78], # ot name
-                _user_data(), # user metadata
-                '\x01\x00', # unknown
-            ]
-        elif self.bin.is_gen(4):
-            gts_data = [
-                _common(), # common data
-                data[0x68:0x78], # ot name
-                data[0x0c:0x0e], # ot ID
-                _user_data(), # user metadata
-            ]
-        
-        data = self.encrypt()
-        # interpreter-safe concatenation using ''.join
-        new_data = [
-            data,
-            ''.join(gts_data),
-        ]
-        new_data = ''.join(new_data)
-        self.bin.add_data(new_data)
-
-        return new_data
-    
-    def togen5(self):
-        "Convert a generation 4 file to generation 5."
-
-        gen5_data = self.bin.togen5()
-        self.load(gen=5, data=gen5_data)
-
-        return gen5_data
-    
-    def encrypt(self):
-        "Encrypt PKM data."
-        
-        encrypted_data = encrypt(self.bin.get_data())
-        self.bin.add_data(encrypted_data)
-        
-        return encrypted_data
-    
-    def decrypt(self):
-        "Decrypt PKM data."
-        
-        decrypted_data = decrypt(self.bin.get_boxdata())
-        self.bin.add_data(decrypted_data)
-
-        return decrypted_data
-    
-    def encrypt_gts(self):
-        "Encrypt PKM data for use in the GTS."
         pass
-    
-    def decrypt_gts(self):
-        "Decrypt PKM data sent over the GTS."
-        pass
-
-class Pkm(BasePkm):
-    "Wrapper class for all PKM file manipulation."
-    pass
