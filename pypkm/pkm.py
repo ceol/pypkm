@@ -1,9 +1,6 @@
 # coding=utf-8
 
-"""Retrieve Pokémon information from a PKM file.
-
-
-"""
+"""Retrieve Pokémon information from a PKM file."""
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 
@@ -107,10 +104,6 @@ class Gen4Pkm(BasePkm):
             new_pkm.egg_location = 2
         if new_pkm.met_location != 0:
             new_pkm.met_location = 2
-        
-        # these location bytes aren't used anymore
-        new_pkm.egg_location_pt = 0
-        new_pkm.met_location_pt = 0
 
         return new_pkm
 
