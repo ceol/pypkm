@@ -20,9 +20,10 @@ To install PyPKM, download and unarchive the package from its [git repository][4
 Then, you can either `cd` into the newly-created directory and run
 `python setup.py install` to install in your global Python path, or you can
 enter the directory and manually copy the `pypkm` subdirectory to a place in
-your Python path.
+your Python path. PyPKM requires [Construct][5]==2.06 to parse file data.
 
 [4]: https://github.com/ceol/pypkm
+[5]: http://construct.wikispaces.com/
 
 ## Usage
 
@@ -48,7 +49,7 @@ hold:
 
 To teach your Pokémon the Roar of Time move:
 
-    my_pkm.move1 = 459
+    my_pkm.moves.move1 = 459
 
 To see your Pokémon trainer's secret ID:
 
@@ -59,9 +60,9 @@ You might even want to change your Pokémon's species all together:
 
     my_pkm.id = 94
 
-As you can tell, you need to know the correct [index number][5] for most
+As you can tell, you need to know the correct [index number][6] for most
 editing. A proper API reference will be made available in time. Until then,
-refer to the appropriate function's documentation in the `pypkm.attr` module.
+refer to the Struct declaration in `pypkm.structs`.
 
 If you've edited the data, you probably want to save. PyPKM does not handle
 saving data; you must save the file yourself. However, to convert an object
@@ -70,10 +71,7 @@ into a string of byte data:
     # you can call tostring()
     my_pkm.tostring()
 
-    # or you can use repr()
-    repr(my_pkm)
-
-[5]: http://bulbapedia.bulbagarden.net/wiki/Index_number
+[6]: http://bulbapedia.bulbagarden.net/wiki/Index_number
 
 ## Contribute
 
@@ -82,13 +80,13 @@ love to hear any bugs or feature requests you have.
 
 ## Thanks
 
-Many thanks to the folks at [Project Pokemon][6] for all of their research
+Many thanks to the folks at [Project Pokemon][7] for all of their research
 into the structure of Pokémon data.
 
-A big thanks to [Stephen Anthony Uy][7] for his pycrypto module. Somehow I
+A big thanks to [Stephen Anthony Uy][8] for his pycrypto module. Somehow I
 came across this module whilst looking for a way to encrypt and decrypt
 Pokémon data, and it's been a huge help (the `shuffle()` function comes
 directly from his work).
 
-[6]: http://projectpokemon.org/
-[7]: mailto:tsanth@iname.com
+[7]: http://projectpokemon.org/
+[8]: mailto:tsanth@iname.com
