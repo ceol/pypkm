@@ -29,36 +29,36 @@ your Python path. PyPKM requires [Construct][5]==2.06 to parse file data.
 
 First, import the `pypkm` package:
 
-    import pypkm
+    >>> import pypkm
 
 Then, create or load a PKM file (making sure to specify the file's game
 generation):
 
     # Create from scratch
-    my_pkm = pypkm.new(gen=4)
+    >>> my_pkm = pypkm.new(gen=4)
     
     # Load from data
-    pkm_data = open('/path/to/MyPokemon.pkm', 'r').read()
-    my_pkm = pypkm.load(gen=4, data=pkm_data)
+    >>> pkm_data = open('/path/to/MyPokemon.pkm', 'r').read()
+    >>> my_pkm = pypkm.load(gen=4, data=pkm_data)
 
 From here, you can edit your Pokémon's data by calling attributes of the
 `my_pkm` instance. For example, to give your Pokémon the Leftovers item to
 hold:
 
-    my_pkm.item = 234
+    >>> my_pkm.item = 234
 
 To teach your Pokémon the Roar of Time move:
 
-    my_pkm.moves.move1 = 459
+    >>> my_pkm.moves.move1 = 459
 
 To see your Pokémon trainer's secret ID:
 
-    my_pkm.ot_secret_id
-    # 65534
+    >>> my_pkm.ot_secret_id
+    65534
 
 You might even want to change your Pokémon's species all together:
 
-    my_pkm.id = 94
+    >>> my_pkm.id = 94
 
 As you can tell, you need to know the correct [index number][6] for most
 editing. A proper API reference will be made available in time. Until then,
@@ -68,8 +68,8 @@ If you've edited the data, you probably want to save. PyPKM does not handle
 saving data; you must save the file yourself. However, to convert an object
 into a string of byte data:
     
-    # you can call tostring()
-    my_pkm.tostring()
+    # you can call tostring() to return byte data
+    >>> my_pkm.tostring()
 
 [6]: http://bulbapedia.bulbagarden.net/wiki/Index_number
 
