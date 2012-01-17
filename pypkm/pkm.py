@@ -83,7 +83,36 @@ class Gen4Pkm(BasePkm):
         pass
 
     def togen5(self):
-        pass
+        data = self.tostring()
+        if len(data) == 236:
+            # shave off the unused data if it's a party file. we don't
+            # need to for pc files because they're the same size
+            # between gens
+            data = data[:220]
+        new_pkm = Gen5Pkm(data)
+
+        # nature gets its own byte in gen 5
+        new_pkm.nature = new_pkm.pv % 25
+
+        # the stringadapters automatically return unicode, and gen 5's
+        # string encoding is unicode, so leverage the work we've
+        # already done
+        new_pkm.nickname = self.nickname
+        new_pkm.ot_name = self.ot_name
+
+        # set locations to faraway place; there's only one location set
+        # at a time (either the pkm was met in the wild or received as
+        # an egg)
+        if new_pkm.egg_location != 0:
+            new_pkm.egg_location = 2
+        if new_pkm.met_location != 0:
+            new_pkm.met_location = 2
+        
+        # these location bytes aren't used anymore
+        new_pkm.egg_location_pt = 0
+        new_pkm.met_location_pt = 0
+
+        return new_pkm
 
 class Gen5Pkm(BasePkm):
     
