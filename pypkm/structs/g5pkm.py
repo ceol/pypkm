@@ -69,7 +69,7 @@ _block0 = Struct('_block0',
 )
 
 _blockA = Struct('_blockA',
-    ULInt16('dex'),
+    ULInt16('id'),
     ULInt16('item'),
     ULInt16('ot_id'),
     ULInt16('ot_secret_id'),
