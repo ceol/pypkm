@@ -4,6 +4,7 @@
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 
+import datetime
 from pypkm.structs import gen4, gen5
 from pypkm.crypto import encrypt, decrypt
 from pypkm.sqlite import get_level, get_nature, get_basestats
@@ -43,8 +44,12 @@ class Gen4Pkm(BasePkm):
             strc = gen4.pkm_struct
         elif len(data) == 236:
             strc = gen4.pkm_party_struct
+        elif len(data) == 292:
+            strc = gen4.pkm_gtsserver_struct
+        elif len(data) == 296:
+            strc = gen4.pkm_gtsclient_struct
         else:
-            raise ValueError('Unsupported PKM file length: expected 136 or 236, received {}'.format(len(data)))
+            raise ValueError('Unsupported PKM file length: expected 136, 236, 292, or 296; received {}'.format(len(data)))
         
         self._load(strc, data)
     
@@ -75,8 +80,74 @@ class Gen4Pkm(BasePkm):
                             level=new_pkm.level, nature_stat=nature[6])
         
         return new_pkm
+    
+    def togtsserver(self):
+        # have to do this in case our old data isn't party
+        obj = self
+        # check if it's a party file (this hopefully saves us from
+        # building data twice)
+        try:
+            obj.level
+        except AttributeError:
+            obj = self.toparty()
+        
+        # pkm data sent over the GTS is both party and encrypted
+        data = encrypt(obj.tostring())
 
-    def togts(self):
+        # create empty data to load into Struct
+        data = ''.join([data, '\x00' * 56]) # totals 292
+        gts = Gen4Pkm(data)
+
+        gts.id = obj.id
+        if obj.is_genderless:
+            gts.gender = 0x03
+        elif obj.is_female:
+            gts.gender = 0x02
+        else:
+            gts.gender = 0x01
+        gts.level = obj.level
+
+        gts.requested.id = 1 # bulbasaur
+        gts.requested.gender = 0x02 # female
+        gts.requested.min_level = 0 # any
+        gts.requested.max_level = 0 # any
+        
+        if obj.ot_is_female:
+            gts.ot_gender = 0x01
+
+        now = datetime.datetime.now()
+        gts.deposited_time.year = now.year
+        gts.deposited_time.month = now.month
+        gts.deposited_time.day = now.day
+        gts.deposited_time.hour = now.hour
+        gts.deposited_time.minute = now.minute
+        gts.deposited_time.second = now.second
+
+        gts.traded_time.year = now.year
+        gts.traded_time.month = now.month
+        gts.traded_time.day = now.day
+        gts.traded_time.hour = now.hour
+        gts.traded_time.minute = now.minute
+        gts.traded_time.second = now.second
+
+        gts.pv = obj.pv
+        gts.ot_name = obj.ot_name
+        gts.ot_id = obj.ot_id
+
+        gts.country = 0xDB # not sure, taken from ir-gts
+        gts.city = 0x02 # not sure, taken from ir-gts
+        
+        if gts.ot_gender == 0x01:
+            # if female, set to lass; if male, leave at 0 for youngster
+            gts.ot_sprite = 0x08
+        
+        gts.is_exchanged = True
+        gts.version = 0x08
+        gts.language = obj.language
+
+        return gts
+    
+    def togtsclient(self):
         pass
 
     def togen5(self):
@@ -117,8 +188,12 @@ class Gen5Pkm(BasePkm):
             strc = gen5.pkm_struct
         elif len(data) == 220:
             strc = gen5.pkm_party_struct
+        elif len(data) == 296:
+            strc = gen5.pkm_gtsserver_struct
+        elif len(data) == 444:
+            strc = gen5.pkm_gtsclient_struct
         else:
-            raise ValueError('Unsupported PKM file length: expected 136 or 220, received {}'.format(len(data)))
+            raise ValueError('Unsupported PKM file length: expected 136, 220, 296, or 444; received {}'.format(len(data)))
         
         self._load(strc, data)
     
@@ -150,5 +225,72 @@ class Gen5Pkm(BasePkm):
         
         return new_pkm
     
-    def togts(self):
+    def togtsserver(self):
+        # have to do this in case our old data isn't party
+        obj = self
+        # check if it's a party file (this hopefully saves us from
+        # building data twice)
+        try:
+            obj.level
+        except AttributeError:
+            obj = self.toparty()
+        
+        # pkm data sent over the GTS is both party and encrypted
+        data = encrypt(obj.tostring())
+
+        # create empty data to load into Struct
+        data = ''.join([data, '\x00' * 76]) # totals 296
+        gts = Gen5Pkm(data)
+
+        gts.id = obj.id
+        if obj.is_genderless:
+            gts.gender = 0x03
+        elif obj.is_female:
+            gts.gender = 0x02
+        else:
+            gts.gender = 0x01
+        gts.level = obj.level
+
+        gts.requested.id = 1 # bulbasaur
+        gts.requested.gender = 0x02 # female
+        gts.requested.min_level = 0 # any
+        gts.requested.max_level = 0 # any
+        
+        if obj.ot_is_female:
+            gts.ot_gender = 0x01
+
+        now = datetime.datetime.now()
+        gts.deposited_time.year = now.year
+        gts.deposited_time.month = now.month
+        gts.deposited_time.day = now.day
+        gts.deposited_time.hour = now.hour
+        gts.deposited_time.minute = now.minute
+        gts.deposited_time.second = now.second
+
+        gts.traded_time.year = now.year
+        gts.traded_time.month = now.month
+        gts.traded_time.day = now.day
+        gts.traded_time.hour = now.hour
+        gts.traded_time.minute = now.minute
+        gts.traded_time.second = now.second
+
+        gts.pv = obj.pv
+        gts.ot_id = obj.ot_id
+        gts.ot_secret_id = obj.ot_secret_id
+        gts.ot_name = obj.ot_name
+
+        gts.country = 0xDB # not sure, taken from ir-gts
+        gts.city = 0x02 # not sure, taken from ir-gts
+        
+        if gts.ot_gender == 0x01:
+            # if female, set to lass; if male, leave at 0 for youngster
+            gts.ot_sprite = 0x08
+        
+        gts.is_exchanged = True
+        gts.version = 0x14
+        gts.language = obj.language
+
+        return gts
+    
+    def togtsclient(self):
         pass
