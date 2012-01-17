@@ -323,7 +323,7 @@ pkm_gtsserver_struct = Struct('pkm_gtsserver_struct',
 
 # Data sent from the GTS client to the server
 pkm_gtsclient_struct = Struct('pkm_gtsclient_struct',
-    ULInt32('checksum'),
+    UBInt32('checksum'),
     ULInt32('pv'),
     ULInt16('length'),
     Padding(1),
