@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from construct import Buffered
+from math import floor
 
 # http://construct.wikispaces.com/bitfields
 # used for IVs (and maybe ribbon sets) since they span two bytes
