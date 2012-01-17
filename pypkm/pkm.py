@@ -4,7 +4,7 @@
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 
-from pypkm.structs import g4pkm, g5pkm
+from pypkm.structs import gen4, gen5
 from pypkm.crypto import encrypt, decrypt
 from pypkm.sqlite import get_level, get_nature, get_basestats
 from pypkm.util import calcstat
@@ -40,9 +40,9 @@ class Gen4Pkm(BasePkm):
             data = '\x00' * 136
         
         if len(data) == 136:
-            strc = g4pkm.pkm_struct
+            strc = gen4.pkm_struct
         elif len(data) == 236:
-            strc = g4pkm.pkm_party_struct
+            strc = gen4.pkm_party_struct
         else:
             raise ValueError('Unsupported PKM file length: expected 136 or 236, received {}'.format(len(data)))
         
@@ -114,9 +114,9 @@ class Gen5Pkm(BasePkm):
             data = '\x00' * 136
         
         if len(data) == 136:
-            strc = g5pkm.pkm_struct
+            strc = gen5.pkm_struct
         elif len(data) == 220:
-            strc = g5pkm.pkm_party_struct
+            strc = gen5.pkm_party_struct
         else:
             raise ValueError('Unsupported PKM file length: expected 136 or 220, received {}'.format(len(data)))
         

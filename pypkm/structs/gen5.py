@@ -9,9 +9,7 @@ Note about BitStructs: it appears Construct has some odd formatting, so
 the bit order is reversed when declaring BitStructs. This should be
 noticeable for ribbons.
 
-Note about nickname and ot_name: We have to do some additional logic
-to convert the Pokémon characters into Unicode character, so each byte
-is returned as a node in a list.
+@see http://projectpokemon.org/wiki/Pokemon_Black/White_NDS_Structure
 """
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
@@ -19,49 +17,7 @@ __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 # I hate doing this, but apparently it's Construct convention
 from construct import *
 from pypkm.util import Swapped
-from pypkm.sqlite import get_chr, get_ord
-
-class PkmStringAdapter(Adapter):
-    def _encode(self, obj, ctx):
-        """Converts a unicode string to a list of Gen 4 ords."""
-
-        # enforce unicode
-        if not isinstance(obj, unicode):
-            obj = obj.decode('utf8')
-
-        ordlist = []
-
-        for chr_ in obj:
-            ord_ = get_ord(chr_)
-            if ord_ == 0xFFFF:
-                break
-            ordlist.append(ord_)
-        
-        while len(ordlist) < (self.bytes - 1):
-            ordlist.append(0xFFFF)
-        
-        ordlist = ordlist[:(self.bytes - 1)]
-        ordlist.append(0xFFFF) # enforce term byte
-
-        return ordlist
-    
-    def _decode(self, obj, ctx):
-        """Converts a list of Gen 4 ords to a unicode string."""
-
-        chrlist = []
-
-        for ord_ in obj:
-            if ord_ == 0xFFFF:
-                break
-            chrlist.append(get_chr(ord_))
-        
-        return ''.join(chrlist)
-
-class NicknameAdapter(PkmStringAdapter):
-    bytes = 11
-
-class OTNameAdapter(PkmStringAdapter):
-    bytes = 8
+from pypkm.adapters.gen5 import NicknameAdapter, OTNameAdapter
 
 _block0 = Struct('_block0',
     ULInt32('pv'),
@@ -215,18 +171,9 @@ _blockB = Struct('_blockB',
         Flag('is_female'),
         Flag('is_fateful'),
     )),
-    BitStruct('leaves',
-        Padding(2),
-        Flag('leaf_crown'),
-        Flag('leaf_e'),
-        Flag('leaf_d'),
-        Flag('leaf_c'),
-        Flag('leaf_b'),
-        Flag('leaf_a'),
-    ),
-    Padding(2),
-    ULInt16('egg_location_pt'),
-    ULInt16('met_location_pt'),
+    ULInt8('nature'),
+    Flag('has_dwability'),
+    Padding(5),
 )
 
 _blockC = Struct('_blockC',
@@ -284,8 +231,7 @@ _blockD = Struct('_blockD',
         BitField('met_level', 7),
     )),
     ULInt8('encounter_type'),
-    ULInt8('hgss_ball'),
-    Padding(1),
+    Padding(2),
 )
 
 # Battle data
@@ -312,7 +258,7 @@ _blockE = Struct('_blockE',
         ULInt16('spdefense'),
     ),
     Bytes('trash_data', 56),
-    Padding(24)
+    Padding(8)
 )
 
 pkm_struct = Struct('pkm_struct',
