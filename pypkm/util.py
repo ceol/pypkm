@@ -30,7 +30,7 @@ def safe_str(obj):
         # obj is unicode
         return unicode(obj).encode('unicode_escape')
 
-def calcstat(self, iv, ev, base, level, nature_stat):
+def calcstat(iv, ev, base, level, nature_stat):
     """Calculate the battle stat of a Pokémon.
 
     Note that some stats may be off by one compared to the
