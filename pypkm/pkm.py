@@ -147,8 +147,18 @@ class Gen4Pkm(BasePkm):
 
         return gts
     
+    def fromgtsserver(self):
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen5Pkm(data)
+    
     def togtsclient(self):
         pass
+    
+    def fromgtsclient(self):
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen5Pkm(data)
 
     def togen5(self):
         data = self.tostring()
@@ -292,5 +302,15 @@ class Gen5Pkm(BasePkm):
 
         return gts
     
+    def fromgtsserver(self):
+        data = decrypt(self.encrypted_pkm)
+        
+        return Gen5Pkm(data)
+    
     def togtsclient(self):
         pass
+    
+    def fromgtsclient(self):
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen5Pkm(data)
