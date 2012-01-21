@@ -19,7 +19,7 @@ setup(
     url=URL,
     packages=find_packages(),
     package_data={'': ['data']},
-    install_requires=['construct==2.06']
+    install_requires=['construct==2.06'],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
