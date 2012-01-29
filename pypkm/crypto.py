@@ -29,7 +29,7 @@ import struct
 from array import array
 from pypkm.rng import Prng, Grng
 
-def _checksum(data, size='H'):
+def checksum(data, size='H'):
     """Calculate the checksum of data using size as word-length.
     
     This defaults to 'H' (a two-byte word) because it's what the
