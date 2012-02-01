@@ -377,7 +377,7 @@ class Gen5Pkm(BasePkm):
             gts.ot_sprite = 0x08
         
         gts.is_exchanged = True
-        gts.version = 0x14
+        gts.version = 0x14 # white version
         gts.language = obj.language
 
         return gts
@@ -453,7 +453,7 @@ class Gen5Pkm(BasePkm):
             gts.ot_sprite = 0x08
         
         gts.is_exchanged = True
-        gts.version = 0x14
+        gts.version = 0x14 # white version
         gts.language = obj.language
 
         gts.unknown_0to8 = 8 # no idea!
