@@ -5,8 +5,9 @@
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
 
 import datetime
+import struct
 from pypkm.structs import gen4, gen5
-from pypkm.crypto import encrypt, decrypt
+from pypkm.crypto import checksum, encrypt, decrypt
 from pypkm.sqlite import get_level, get_nature, get_basestats
 from pypkm.util import calcstat
 
@@ -32,7 +33,19 @@ class BasePkm(object):
         self._ctnr = self._strc.parse(data)
     
     def tostring(self):
-        return self._strc.build(self._ctnr)
+        data = self._strc.build(self._ctnr)
+        
+        # 
+        if len(data) in [136, 220, 236]:
+            chksum = checksum(data[0x08:])
+            packed = struct.pack('<H', chksum)
+            data = ''.join([
+                data[:0x06],
+                packed,
+                data[0x08:],
+            ])
+
+        return data
 
 class Gen4Pkm(BasePkm):
 
@@ -56,6 +69,7 @@ class Gen4Pkm(BasePkm):
     def toparty(self):
         # even if it's already a party file, we should process it
         data = self.tostring()[:136]
+        
         # create empty data to load into Struct
         data = ''.join([data, '\x00' * 100])
         new_pkm = Gen4Pkm(data)
@@ -95,8 +109,9 @@ class Gen4Pkm(BasePkm):
         data = encrypt(obj.tostring())
 
         # create empty data to load into Struct
-        data = ''.join([data, '\x00' * 56]) # totals 292
-        gts = Gen4Pkm(data)
+        gts = Gen4Pkm('\x00' * 292)
+
+        gts.encrypted_pkm = data
 
         gts.id = obj.id
         if obj.is_genderless:
@@ -153,7 +168,71 @@ class Gen4Pkm(BasePkm):
         return Gen5Pkm(data)
     
     def togtsclient(self):
-        pass
+        # have to do this in case our old data isn't party
+        obj = self
+        # check if it's a party file (this hopefully saves us from
+        # building data twice)
+        try:
+            obj.level
+        except AttributeError:
+            obj = self.toparty()
+        
+        # pkm data sent over the GTS is both party and encrypted
+        data = encrypt(obj.tostring())
+
+        # create empty data to load into Struct
+        gts = Gen4Pkm('\x00' * 296)
+
+        gts.encrypted_pkm = data
+
+        gts.id = obj.id
+        if obj.is_genderless:
+            gts.gender = 0x03
+        elif obj.is_female:
+            gts.gender = 0x02
+        else:
+            gts.gender = 0x01
+        gts.level = obj.level
+
+        gts.requested.id = 1 # bulbasaur
+        gts.requested.gender = 0x02 # female
+        gts.requested.min_level = 0 # any
+        gts.requested.max_level = 0 # any
+        
+        if obj.ot_is_female:
+            gts.ot_gender = 0x01
+
+        now = datetime.datetime.now()
+        gts.deposited_time.year = now.year
+        gts.deposited_time.month = now.month
+        gts.deposited_time.day = now.day
+        gts.deposited_time.hour = now.hour
+        gts.deposited_time.minute = now.minute
+        gts.deposited_time.second = now.second
+
+        gts.traded_time.year = now.year
+        gts.traded_time.month = now.month
+        gts.traded_time.day = now.day
+        gts.traded_time.hour = now.hour
+        gts.traded_time.minute = now.minute
+        gts.traded_time.second = now.second
+
+        gts.pv = obj.pv
+        gts.ot_name = obj.ot_name
+        gts.ot_id = obj.ot_id
+
+        gts.country = 0xDB # not sure, taken from ir-gts
+        gts.city = 0x02 # not sure, taken from ir-gts
+        
+        if gts.ot_gender == 0x01:
+            # if female, set to lass; if male, leave at 0 for youngster
+            gts.ot_sprite = 0x08
+        
+        gts.is_exchanged = True
+        gts.version = 0x08
+        gts.language = obj.language
+
+        return gts
     
     def fromgtsclient(self):
         data = decrypt(self.encrypted_pkm)
@@ -249,8 +328,9 @@ class Gen5Pkm(BasePkm):
         data = encrypt(obj.tostring())
 
         # create empty data to load into Struct
-        data = ''.join([data, '\x00' * 76]) # totals 296
-        gts = Gen5Pkm(data)
+        gts = Gen5Pkm('\x00' * 296)
+
+        gts.encrypted_pkm = data
 
         gts.id = obj.id
         if obj.is_genderless:
@@ -308,7 +388,79 @@ class Gen5Pkm(BasePkm):
         return Gen5Pkm(data)
     
     def togtsclient(self):
-        pass
+        # have to do this in case our old data isn't party
+        obj = self
+        # check if it's a party file (this hopefully saves us from
+        # building data twice)
+        try:
+            obj.level
+        except AttributeError:
+            obj = self.toparty()
+        
+        # pkm data sent over the GTS is both party and encrypted
+        data = encrypt(obj.tostring())
+
+        # create empty data to load into Struct
+        gts = Gen5Pkm('\x00' * 444)
+
+        gts.encrypted_pkm = data
+
+        gts.pv = obj.pv
+        gts.length = 432
+
+        gts.id = obj.id
+        if obj.is_genderless:
+            gts.gender = 0x03
+        elif obj.is_female:
+            gts.gender = 0x02
+        else:
+            gts.gender = 0x01
+        gts.level = obj.level
+
+        gts.requested.id = 1 # bulbasaur
+        gts.requested.gender = 0x02 # female
+        gts.requested.min_level = 0 # any
+        gts.requested.max_level = 0 # any
+        
+        if obj.ot_is_female:
+            gts.ot_gender = 0x01
+        gts.ot_nature = 24 # quirky
+
+        now = datetime.datetime.now()
+        gts.deposited_time.year = now.year
+        gts.deposited_time.month = now.month
+        gts.deposited_time.day = now.day
+        gts.deposited_time.hour = now.hour
+        gts.deposited_time.minute = now.minute
+        gts.deposited_time.second = now.second
+
+        gts.traded_time.year = now.year
+        gts.traded_time.month = now.month
+        gts.traded_time.day = now.day
+        gts.traded_time.hour = now.hour
+        gts.traded_time.minute = now.minute
+        gts.traded_time.second = now.second
+
+        gts.ot_id = obj.ot_id
+        gts.ot_secret_id = obj.ot_secret_id
+        gts.ot_name = obj.ot_name
+
+        gts.country = 0xDB # not sure, taken from ir-gts
+        gts.city = 0x02 # not sure, taken from ir-gts
+        
+        if gts.ot_gender == 0x01:
+            # if female, set to lass; if male, leave at 0 for youngster
+            gts.ot_sprite = 0x08
+        
+        gts.is_exchanged = True
+        gts.version = 0x14
+        gts.language = obj.language
+
+        gts.unknown_0to8 = 8 # no idea!
+
+        gts.terminator = 128
+
+        return gts
     
     def fromgtsclient(self):
         data = decrypt(self.encrypted_pkm)
