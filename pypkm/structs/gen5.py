@@ -372,6 +372,15 @@ pkm_gtsclient_struct = Struct('pkm_gtsclient_struct',
     ULInt8('unknown_0to8'),
     ULInt8('tower_floors'),
     Padding(4),
+
+    # according to maxg, the 128-byte signature is created by
+    # sending the party struct to pkvldtprod.nintendo.co.jp and
+    # using the token returned by the server (if it passes
+    # validation). because it would be a total PITA to either
+    # reverse engineer or include the legitimate validation, and
+    # that this library is made with fake GTS servers in mind, I'm
+    # going to default to NUL bytes. fake GTS servers can't even
+    # validate the signature, so it shouldn't matter.
     Bytes('struct_signature', 128),
     ULInt32('terminator'), # always 128
 )
