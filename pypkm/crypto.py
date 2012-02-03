@@ -27,7 +27,7 @@ __author__ = "Patrick Jacobs <ceolwulf@gmail.com>"
 
 import struct
 from array import array
-from pypkm.rng import Prng, Grng
+from pypkm.rng import Prng, Arng, Grng
 
 def checksum(data, size='H'):
     """Calculate the checksum of data using size as word-length.
@@ -194,7 +194,7 @@ def _pack(pv, chksum, box_data, party_data):
     ]
     return ''.join(chunks)
 
-def _crypt(seed, data):
+def _crypt(seed, data, obj=Prng):
     """Encrypts/decrypts data with the given seed.
 
     Keyword arguments:
@@ -203,7 +203,7 @@ def _crypt(seed, data):
     """
 
     data = array('H', data)
-    lc = Prng(seed)
+    lc = obj(seed)
 
     new_data = array('H')
     for word in data:
@@ -224,7 +224,6 @@ def encrypt(data):
     chksum = _checksum(box_data)
     box_data = _crypt(chksum, box_data)
 
-    party_data = _shuffle(pv, party_data)
     party_data = _crypt(pv, party_data)
 
     return _pack(pv, chksum, box_data, party_data)
@@ -242,7 +241,6 @@ def decrypt(data):
     box_data = _unshuffle(pv, box_data)
 
     party_data = _crypt(pv, party_data)
-    party_data = _unshuffle(pv, party_data)
 
     return _pack(pv, chksum, box_data, party_data)
 
@@ -252,7 +250,15 @@ def encrypt_gts(data):
     Keyword arguments:
     data (string) -- the Pokémon data to encrypt
     """
-    pass
+    (pv, chksum, box_data, party_data) = _unpack(data)
+
+    box_data = _shuffle(pv, box_data)
+    chksum = _checksum(box_data)
+    box_data = _crypt(chksum, box_data, obj=Grng)
+
+    party_data = _crypt(pv, party_data, obj=Grng)
+
+    return _pack(pv, chksum, box_data, party_data)
 
 def decrypt_gts(data):
     """Decrypt PKM bin sent over the GTS.
@@ -260,4 +266,11 @@ def decrypt_gts(data):
     Keyword arguments:
     data (string) -- the Pokémon binary to decrypt
     """
-    pass
+    (pv, chksum, box_data, party_data) = _unpack(data)
+    
+    box_data = _crypt(chksum, box_data, obj=Grng)
+    box_data = _unshuffle(pv, box_data)
+
+    party_data = _crypt(pv, party_data, obj=Grng)
+
+    return _pack(pv, chksum, box_data, party_data)
