@@ -165,7 +165,7 @@ class Gen4Pkm(BasePkm):
     def fromgtsserver(self):
         data = decrypt(self.encrypted_pkm)
 
-        return Gen5Pkm(data)
+        return Gen4Pkm(data)
     
     def togtsclient(self):
         # have to do this in case our old data isn't party
@@ -237,7 +237,7 @@ class Gen4Pkm(BasePkm):
     def fromgtsclient(self):
         data = decrypt(self.encrypted_pkm)
 
-        return Gen5Pkm(data)
+        return Gen4Pkm(data)
 
     def togen5(self):
         data = self.tostring()
