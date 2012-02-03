@@ -80,13 +80,19 @@ love to hear any bugs or feature requests you have.
 
 ## Thanks
 
-Many thanks to the folks at [Project Pokemon][7] for all of their research
+The folks at [Project Pokemon][7] for all of their research
 into the structure of Pokémon data.
 
-A big thanks to [Stephen Anthony Uy][8] for his pycrypto module. Somehow I
-came across this module whilst looking for a way to encrypt and decrypt
-Pokémon data, and it's been a huge help (the `shuffle()` function comes
-directly from his work).
+[maxg][8] for answering my questions.
+
+[Veekun][9] for looking over my code, introducing me to [Construct][5], and
+providing an awesome database of Pokémon information.
+
+[Stephen Anthony Uy][10] for his pycrypto module. Somehow I came across this
+module whilst looking for a way to encrypt and decrypt Pokémon data, and
+it's been a huge help (the `shuffle()` function comes directly from his work).
 
 [7]: http://projectpokemon.org/
-[8]: mailto:tsanth@iname.com
+[8]: http://www.pokecheck.org/
+[9]: http://veekun.com/
+[10]: mailto:tsanth@iname.com
