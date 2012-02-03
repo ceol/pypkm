@@ -41,6 +41,8 @@ def get_chr(ord_):
 
     if row is not None:
         return row[0]
+    
+    return ''
 
 def get_ord(chr_):
     """Retrieve an ordinal from the gen 4 character table.
@@ -58,6 +60,8 @@ def get_ord(chr_):
 
     if row is not None:
         return row[0]
+    
+    return ''
 
 def get_growthrate(pokemon_id):
     """Retrieve the growth rate ID of a Pokémon by its Dex ID.
