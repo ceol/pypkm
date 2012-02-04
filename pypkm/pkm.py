@@ -66,6 +66,12 @@ class Gen4Pkm(BasePkm):
         
         self._load(strc, data)
     
+    def topkm(self):
+        # for converting from GTS data
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen4Pkm(data)
+    
     def toparty(self):
         # even if it's already a party file, we should process it
         data = self.tostring()[:136]
@@ -109,7 +115,7 @@ class Gen4Pkm(BasePkm):
         data = encrypt(obj.tostring())
 
         # create empty data to load into Struct
-        gts = Gen4Pkm('\x00' * 292)
+        gts = Gen4ServerPkm('\x00' * 292)
 
         gts.encrypted_pkm = data
 
@@ -157,15 +163,10 @@ class Gen4Pkm(BasePkm):
             gts.ot_sprite = 0x08
         
         gts.is_exchanged = True
-        gts.version = 0x08
+        gts.version = 0x08 # soulsilver version
         gts.language = obj.language
 
         return gts
-    
-    def fromgtsserver(self):
-        data = decrypt(self.encrypted_pkm)
-
-        return Gen4Pkm(data)
     
     def togtsclient(self):
         # have to do this in case our old data isn't party
@@ -181,7 +182,7 @@ class Gen4Pkm(BasePkm):
         data = encrypt(obj.tostring())
 
         # create empty data to load into Struct
-        gts = Gen4Pkm('\x00' * 296)
+        gts = Gen4ClientPkm('\x00' * 296)
 
         gts.encrypted_pkm = data
 
@@ -229,15 +230,10 @@ class Gen4Pkm(BasePkm):
             gts.ot_sprite = 0x08
         
         gts.is_exchanged = True
-        gts.version = 0x08
+        gts.version = 0x08 # soulsilver version
         gts.language = obj.language
 
         return gts
-    
-    def fromgtsclient(self):
-        data = decrypt(self.encrypted_pkm)
-
-        return Gen4Pkm(data)
 
     def togen5(self):
         data = self.tostring()
@@ -286,6 +282,11 @@ class Gen5Pkm(BasePkm):
         
         self._load(strc, data)
     
+    def topkm(self):
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen5Pkm(data)
+    
     def toparty(self):
         # even if it's already a party file, we should process it
         data = self.tostring()[:136]
@@ -328,7 +329,7 @@ class Gen5Pkm(BasePkm):
         data = encrypt(obj.tostring())
 
         # create empty data to load into Struct
-        gts = Gen5Pkm('\x00' * 296)
+        gts = Gen5ServerPkm('\x00' * 296)
 
         gts.encrypted_pkm = data
 
@@ -382,11 +383,6 @@ class Gen5Pkm(BasePkm):
 
         return gts
     
-    def fromgtsserver(self):
-        data = decrypt(self.encrypted_pkm)
-        
-        return Gen5Pkm(data)
-    
     def togtsclient(self):
         # have to do this in case our old data isn't party
         obj = self
@@ -401,7 +397,7 @@ class Gen5Pkm(BasePkm):
         data = encrypt(obj.tostring())
 
         # create empty data to load into Struct
-        gts = Gen5Pkm('\x00' * 444)
+        gts = Gen5ClientPkm('\x00' * 444)
 
         gts.encrypted_pkm = data
 
@@ -461,8 +457,3 @@ class Gen5Pkm(BasePkm):
         gts.terminator = 128
 
         return gts
-    
-    def fromgtsclient(self):
-        data = decrypt(self.encrypted_pkm)
-
-        return Gen5Pkm(data)
