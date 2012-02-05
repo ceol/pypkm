@@ -66,14 +66,14 @@ refer to the Struct declaration in `pypkm.structs`.
 
 If you have GTS data, you can edit that as well:
 
->>> gts_data = open('/path/to/gts_pkm.pkm.proper', 'r').open()
->>> proper_pkm = pypkm.load(gen=4, data=gts_data)
+    >>> gts_data = open('/path/to/gts_pkm.pkm.proper', 'r').open()
+    >>> proper_pkm = pypkm.load(gen=4, data=gts_data)
 
->>> proper_pkm.level
-5
+    >>> proper_pkm.level
+    5
 
->>> proper_pkm.ot_name
-u'Trainer'
+    >>> proper_pkm.ot_name
+    u'Trainer'
 
 PyPKM also handles converting data. You can convert PC box data to party data,
 to/from GTS server-sent data, and to/from GTS client-sent data. The list of
