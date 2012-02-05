@@ -79,11 +79,11 @@ PyPKM also handles converting data. You can convert PC box data to party data,
 to/from GTS server-sent data, and to/from GTS client-sent data. The list of
 conversion methods are as follows:
 
-* Gen4Pkm.togen5() - converts Gen 4 data to Gen 5
-* .topkm() - converts GTS data to a Pkm object
+* .togen5() - converts Gen 4 data to Gen 5
 * .toparty() - adds battle data
 * .togtsserver() - converts to data sent by the GTS server
 * .togtsclient() - converts to data sent by the DS
+* .topkm() - converts GTS data to a Pkm object
 
 If you've edited the data, you probably want to save. PyPKM does not handle
 saving data; you must save the file yourself. However, to convert an object
