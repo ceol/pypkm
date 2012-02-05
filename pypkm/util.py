@@ -62,3 +62,14 @@ def calcstat(iv, ev, base, level, nature_stat):
         stat = (num / denom) + 5
 
         return int(floor(floor(stat) * nature_stat))
+
+class LengthError(Exception):
+
+    def __init__(self, expected_length, given_length, Errors):
+        message = 'expected {}, received {}'
+        message = message.format(expected_length, given_length)
+
+        # http://stackoverflow.com/a/1319675/374470
+        Exception.__init__(self, message)
+
+        self.Errors = Errors

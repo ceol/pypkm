@@ -64,6 +64,27 @@ As you can tell, you need to know the correct [index number][6] for most
 editing. A proper API reference will be made available in time. Until then,
 refer to the Struct declaration in `pypkm.structs`.
 
+If you have GTS data, you can edit that as well:
+
+>>> gts_data = open('/path/to/gts_pkm.pkm.proper', 'r').open()
+>>> proper_pkm = pypkm.load(gen=4, data=gts_data)
+
+>>> proper_pkm.level
+5
+
+>>> proper_pkm.ot_name
+u'Trainer'
+
+PyPKM also handles converting data. You can convert PC box data to party data,
+to/from GTS server-sent data, and to/from GTS client-sent data. The list of
+conversion methods are as follows:
+
+* Gen4Pkm.togen5() - converts Gen 4 data to Gen 5
+* .topkm() - converts GTS data to a Pkm object
+* .toparty() - adds battle data
+* .togtsserver() - converts to data sent by the GTS server
+* .togtsclient() - converts to data sent by the DS
+
 If you've edited the data, you probably want to save. PyPKM does not handle
 saving data; you must save the file yourself. However, to convert an object
 into a string of byte data:
@@ -80,13 +101,19 @@ love to hear any bugs or feature requests you have.
 
 ## Thanks
 
-Many thanks to the folks at [Project Pokemon][7] for all of their research
+The folks at [Project Pokemon][7] for all of their research
 into the structure of Pokémon data.
 
-A big thanks to [Stephen Anthony Uy][8] for his pycrypto module. Somehow I
-came across this module whilst looking for a way to encrypt and decrypt
-Pokémon data, and it's been a huge help (the `shuffle()` function comes
-directly from his work).
+[maxg][8] for answering my questions.
+
+[Veekun][9] for looking over my code, introducing me to [Construct][5], and
+providing an awesome database of Pokémon information.
+
+[Stephen Anthony Uy][10] for his pycrypto module. Somehow I came across this
+module whilst looking for a way to encrypt and decrypt Pokémon data, and
+it's been a huge help (the `shuffle()` function comes directly from his work).
 
 [7]: http://projectpokemon.org/
-[8]: mailto:tsanth@iname.com
+[8]: http://www.pokecheck.org/
+[9]: http://veekun.com/
+[10]: mailto:tsanth@iname.com
