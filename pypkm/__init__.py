@@ -30,7 +30,7 @@ their IRC channel.
 """
 
 __author__ = 'Patrick Jacobs <ceolwulf@gmail.com>'
-__version__ = '0.4'
+__version__ = '0.5'
 
 from pypkm.pkm import get_pkmobj
 
