@@ -9,9 +9,11 @@ import struct
 from pypkm.structs import gen4, gen5
 from pypkm.crypto import checksum, encrypt, decrypt
 from pypkm.sqlite import get_level, get_nature, get_basestats
-from pypkm.util import calcstat
+from pypkm.util import calcstat, LengthError
+        
 
-class BasePkm(object):
+class StructData(object):
+    """A wrapper class for the construct Container object."""
 
     # Constructor Struct object
     _strc = None
@@ -34,43 +36,38 @@ class BasePkm(object):
     
     def tostring(self):
         data = self._strc.build(self._ctnr)
-        
-        # 
-        if len(data) in [136, 220, 236]:
-            chksum = checksum(data[0x08:])
-            packed = struct.pack('<H', chksum)
-            data = ''.join([
-                data[:0x06],
-                packed,
-                data[0x08:],
-            ])
 
         return data
 
-class Gen4Pkm(BasePkm):
+class PkmData(StructData):
+    """A base class for Pokémon data."""
+    
+    def tostring(self):
+        data = super(PkmData, self).tostring()
+
+        # we need to recalculate the checksum when we build...
+        # since building removes any trash bytes in the nickname and
+        # ot name fields, if you're just reading the file, you should
+        # store the loaded data instead of using tostring()
+        chksum = checksum(data[0x08:])
+        packed = struct.pack('<H', chksum)
+        data = ''.join([
+            data[:0x06],
+            packed,
+            data[0x08:],
+        ])
+
+        return data
+
+class Gen4BoxPkm(PkmData):
 
     def __init__(self, data=None):
         if data is None:
             data = '\x00' * 136
+        elif len(data) != 136:
+            raise LengthError(136, len(data))
         
-        if len(data) == 136:
-            strc = gen4.pkm_struct
-        elif len(data) == 236:
-            strc = gen4.pkm_party_struct
-        elif len(data) == 292:
-            strc = gen4.pkm_gtsserver_struct
-        elif len(data) == 296:
-            strc = gen4.pkm_gtsclient_struct
-        else:
-            raise ValueError('Unsupported PKM file length: expected 136, 236, 292, or 296; received {}'.format(len(data)))
-        
-        self._load(strc, data)
-    
-    def topkm(self):
-        # for converting from GTS data
-        data = decrypt(self.encrypted_pkm)
-
-        return Gen4Pkm(data)
+        self._load(gen4.pkm_struct, data)
     
     def toparty(self):
         # even if it's already a party file, we should process it
@@ -78,7 +75,7 @@ class Gen4Pkm(BasePkm):
         
         # create empty data to load into Struct
         data = ''.join([data, '\x00' * 100])
-        new_pkm = Gen4Pkm(data)
+        new_pkm = Gen4PartyPkm(data)
 
         new_pkm.level = get_level(pokemon_id=new_pkm.id, exp=new_pkm.exp)
 
@@ -234,7 +231,7 @@ class Gen4Pkm(BasePkm):
         gts.language = obj.language
 
         return gts
-
+    
     def togen5(self):
         data = self.tostring()
         if len(data) == 236:
@@ -242,7 +239,9 @@ class Gen4Pkm(BasePkm):
             # need to for pc files because they're the same size
             # between gens
             data = data[:220]
-        new_pkm = Gen5Pkm(data)
+            new_pkm = Gen5PartyPkm(data)
+        else:
+            new_pkm = Gen5BoxPkm(data)
 
         # nature gets its own byte in gen 5
         new_pkm.nature = new_pkm.pv % 25
@@ -263,36 +262,33 @@ class Gen4Pkm(BasePkm):
 
         return new_pkm
 
-class Gen5Pkm(BasePkm):
+class Gen4PartyPkm(Gen4BoxPkm):
     
     def __init__(self, data=None):
         if data is None:
-            data = '\x00' * 136
+            data = '\x00' * 236
+        elif len(data) != 236:
+            raise LengthError(236, len(data))
         
-        if len(data) == 136:
-            strc = gen5.pkm_struct
-        elif len(data) == 220:
-            strc = gen5.pkm_party_struct
-        elif len(data) == 296:
-            strc = gen5.pkm_gtsserver_struct
-        elif len(data) == 444:
-            strc = gen5.pkm_gtsclient_struct
-        else:
-            raise ValueError('Unsupported PKM file length: expected 136, 220, 296, or 444; received {}'.format(len(data)))
-        
-        self._load(strc, data)
+        self._load(gen4.pkm_party_struct, data)
     
-    def topkm(self):
-        data = decrypt(self.encrypted_pkm)
+class Gen5BoxPkm(PkmData):
 
-        return Gen5Pkm(data)
+    def __init__(self, data=None):
+        if data is None:
+            data = '\x00' * 136
+        elif len(data) != 136:
+            raise LengthError(136, len(data))
+        
+        self._load(gen5.pkm_struct, data)
     
     def toparty(self):
         # even if it's already a party file, we should process it
         data = self.tostring()[:136]
+        
         # create empty data to load into Struct
-        data = ''.join([data, '\x00' * 84])
-        new_pkm = Gen5Pkm(data)
+        data = ''.join([data, '\x00' * 100])
+        new_pkm = Gen5PartyPkm(data)
 
         new_pkm.level = get_level(pokemon_id=new_pkm.id, exp=new_pkm.exp)
 
@@ -457,3 +453,95 @@ class Gen5Pkm(BasePkm):
         gts.terminator = 128
 
         return gts
+
+class Gen5PartyPkm(Gen5BoxPkm):
+    
+    def __init__(self, data=None):
+        if data is None:
+            data = '\x00' * 220
+        elif len(data) != 220:
+            raise LengthError(220, len(data))
+        
+        self._load(gen5.pkm_party_struct, data)
+
+class GTSData(StructData):
+    """A base class for data sent to or from the GTS server."""
+    pass
+
+class Gen4ServerData(GTSData):
+    
+    def __init__(self, data=None):
+        if data is None:
+            data = '\x00' * 292
+        elif len(data) != 292:
+            raise LengthError(292, len(data))
+        
+        self._load(gen4.pkm_gtsserver_struct, data)
+    
+    def topkm(self):
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen4PartyPkm(data)
+
+class Gen4ClientData(GTSData):
+    
+    def __init__(self, data=None):
+        if data is None:
+            data = '\x00' * 296
+        elif len(data) != 296:
+            raise LengthError(296, len(data))
+        
+        self._load(gen4.pkm_gtsclient_struct, data)
+    
+    def topkm(self):
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen4PartyPkm(data)
+
+class Gen5ServerData(GTSData):
+    
+    def __init__(self, data=None):
+        if data is None:
+            data = '\x00' * 296
+        elif len(data) != 296:
+            raise LengthError(296, len(data))
+        
+        self._load(gen5.pkm_gtsserver_struct, data)
+    
+    def topkm(self):
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen5PartyPkm(data)
+
+class Gen5ClientData(GTSData):
+    
+    def __init__(self, data=None):
+        if data is None:
+            data = '\x00' * 444
+        elif len(data) != 444:
+            raise LengthError(444, len(data))
+        
+        self._load(gen5.pkm_gtsclient_struct, data)
+    
+    def topkm(self):
+        data = decrypt(self.encrypted_pkm)
+
+        return Gen5PartyPkm(data)
+
+def get_pkmobj(gen, data):
+    objs = {
+        4: {
+            136: Gen4BoxPkm,
+            236: Gen4PartyPkm,
+            292: Gen4ServerData,
+            296: Gen4ClientData,
+        },
+        5: {
+            136: Gen5BoxPkm,
+            220: Gen5PartyPkm,
+            296: Gen5ServerData,
+            444: Gen5ClientData,
+        }
+    }
+    
+    return objs.get(gen).get(len(data))(data)
